@@ -31,7 +31,7 @@ Built with:
 │   └── opendkim.ts             # Core library
 ├── components/
 │   └── Navbar.tsx              # Navigation
-├── data/                       # Example OpenDKIM config for dev
+├── data/                       # Local OpenDKIM config (gitignored)
 └── docs/                       # This directory
 ```
 
@@ -135,9 +135,11 @@ If the values don't match, the container will get permission errors reading/writ
 
 | Host Path | Container Path | Mode | Purpose |
 |-----------|---------------|------|---------|
-| `/etc/opendkim` | `/etc/opendkim` | read-write | Config files and keys |
-| `/etc/opendkim.conf` | `/etc/opendkim.conf` | read-only | Main config |
-| `/run/opendkim` | `/run/opendkim` | read-only | PID file for reload |
+| `/etc/opendkim` | `/data/opendkim` | read-write | Config files and keys |
+| `/etc/opendkim.conf` | `/data/opendkim.conf` | read-only | Main config |
+| `/run/opendkim` | `/data/run` | read-only | PID file for reload |
+
+Host paths are mounted into `/data/` inside the container rather than system paths — the container has no reason to expose `/etc/` or `/run/`.
 
 ### Service Reload (SIGHUP)
 
@@ -185,14 +187,31 @@ location / {
 
 ## Development
 
-### Example Data
+### Local Data Directory
 
-The `data/` directory contains a complete example OpenDKIM config tree for local development. Point `.env.local` at it:
+The `data/` directory is gitignored and holds the OpenDKIM config tree the app reads and writes to. For local development, create it with the standard OpenDKIM file structure:
+
+```
+data/etc/
+├── opendkim.conf
+└── opendkim/
+    ├── KeyTable
+    ├── SigningTable
+    ├── TrustedHosts
+    └── keys/
+        └── <domain>/
+            ├── mail.private
+            └── mail.txt
+```
+
+Then point `.env.local` at it:
 
 ```env
 OPENDKIM_CONFIG_DIR=./data/etc/opendkim
 OPENDKIM_CONF=./data/etc/opendkim.conf
 ```
+
+In production via Docker, the host's `/etc/opendkim` is mounted into the container at the same path — `data/` is not used.
 
 ### Adding a Domain (Flow)
 

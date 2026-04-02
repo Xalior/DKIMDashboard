@@ -11,16 +11,15 @@ services:
     ports:
       - "${DASHBOARD_PORT:-3000}:3000"
     volumes:
-      # Mount the live OpenDKIM config directory
-      - ${OPENDKIM_CONFIG_DIR:-/etc/opendkim}:/etc/opendkim
-      # Mount opendkim.conf (read-only)
-      - ${OPENDKIM_CONF:-/etc/opendkim.conf}:/etc/opendkim.conf:ro
+      # Mount host OpenDKIM config into non-system paths
+      - ${OPENDKIM_CONFIG_DIR:-/etc/opendkim}:/data/opendkim
+      - ${OPENDKIM_CONF:-/etc/opendkim.conf}:/data/opendkim.conf:ro
       # Mount PID file directory for service reload (SIGHUP)
-      - ${OPENDKIM_RUN_DIR:-/run/opendkim}:/run/opendkim:ro
+      - ${OPENDKIM_RUN_DIR:-/run/opendkim}:/data/run:ro
     environment:
-      - OPENDKIM_CONFIG_DIR=/etc/opendkim
-      - OPENDKIM_CONF=/etc/opendkim.conf
-      - OPENDKIM_PID_FILE=/run/opendkim/opendkim.pid
+      - OPENDKIM_CONFIG_DIR=/data/opendkim
+      - OPENDKIM_CONF=/data/opendkim.conf
+      - OPENDKIM_PID_FILE=/data/run/opendkim.pid
     # Required for the reload feature — allows the container to send
     # SIGHUP to the host's opendkim process via its PID file.
     # Remove this if you don't need in-app reload.

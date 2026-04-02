@@ -16,43 +16,23 @@
 - ⚙️ **Config Viewer** — Read-only view of `opendkim.conf`, `SigningTable`, and `KeyTable`
 - 🔄 **Service Reload** — Send SIGHUP to OpenDKIM to pick up config changes
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- An OpenDKIM installation (or the example data for development)
-
-### Installation
+## 🚀 Quick Start
 
 ```bash
 git clone <repo-url>
 cd DKIMDashboard
 npm install
-```
-
-### ⚙️ Configuration
-
-Copy the example env file and adjust paths:
-
-```bash
 cp .env.example .env.local
 ```
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `OPENDKIM_CONFIG_DIR` | Path to OpenDKIM config directory (contains `KeyTable`, `SigningTable`, `TrustedHosts`, `keys/`) | `/etc/opendkim` |
-| `OPENDKIM_CONF` | Path to `opendkim.conf` | `/etc/opendkim.conf` |
-| `OPENDKIM_PID_FILE` | Path to OpenDKIM PID file (for reload) | `/run/opendkim/opendkim.pid` |
-
-For local development, point these at the included example data:
+Edit `.env.local` to point at your OpenDKIM configuration:
 
 ```env
-OPENDKIM_CONFIG_DIR=./data/etc/opendkim
-OPENDKIM_CONF=./data/etc/opendkim.conf
+OPENDKIM_CONFIG_DIR=/etc/opendkim
+OPENDKIM_CONF=/etc/opendkim.conf
 ```
 
-### 🏃 Running
+Then run:
 
 ```bash
 npm run dev
@@ -60,9 +40,19 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) 🎉
 
+## 🐳 Production Deployment
+
+For production, use Docker Compose with the host's live OpenDKIM config mounted in. See the full [Docker deployment guide](docs/README.md#docker-deployment) for UID/GID setup, volume mounts, service reload, and reverse proxy configuration.
+
+```bash
+cp .env.example .env
+# Edit .env — set APP_UID/APP_GID to match your host's opendkim user
+docker compose up -d
+```
+
 ## 📚 Documentation
 
-Full architecture, API reference, and development docs are in [docs/](docs/README.md).
+Full [architecture, API reference, and development docs](docs/README.md).
 
 ## 📝 License
 
