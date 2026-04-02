@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🔐 DKIM Dashboard
 
-## Getting Started
+> 🛡️ A web-based management interface for OpenDKIM — generate keys, manage domains, verify DNS, and keep your email signing infrastructure under control.
 
-First, run the development server:
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
+
+---
+
+## ✨ Features
+
+- 🌐 **Domain Management** — Add, remove, and view signing domains with their from-patterns and selectors
+- 🔑 **Key Generation** — Pure TypeScript RSA-2048 key generation, no shell dependencies
+- 📋 **DNS Record View** — See exactly what TXT record each domain needs
+- ✅ **DNS Verification** — Live DNS lookups to validate your DKIM records match the keys on disk
+- 👥 **Trusted Hosts** — Manage the hosts/networks allowed to send mail for signing
+- ⚙️ **Config Viewer** — Read-only view of `opendkim.conf`, `SigningTable`, and `KeyTable`
+- 🔄 **Service Reload** — Send SIGHUP to OpenDKIM to pick up config changes
+
+## 🚀 Quick Start
+
+```bash
+git clone <repo-url>
+cd DKIMDashboard
+npm install
+cp .env.example .env.local
+```
+
+Edit `.env.local` to point at your OpenDKIM configuration:
+
+```env
+OPENDKIM_CONFIG_DIR=./data/opendkim
+OPENDKIM_CONF=./data/opendkim.conf
+```
+
+Then run:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) 🎉
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🐳 Production Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+For production, use Docker Compose with the host's live OpenDKIM config mounted in. See the full [Docker deployment guide](docs/README.md#docker-deployment) for UID/GID setup, volume mounts, service reload, and reverse proxy configuration.
 
-## Learn More
+```bash
+cp .env.example .env
+# Edit .env — set APP_UID/APP_GID to match your host's opendkim user
+docker compose up -d
+```
 
-To learn more about Next.js, take a look at the following resources:
+## ⚠️ Security Notice
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This application has **no built-in authentication or access control**. All endpoints are unrestricted. Access management should be handled at your edge/ingress layer (e.g. nginx basic auth, reverse proxy IP allowlists, VPN, etc.). **Do not expose this application directly to the internet.**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📚 Documentation
 
-## Deploy on Vercel
+Full [architecture, API reference, and development docs](docs/README.md).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📝 License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the [GNU Lesser General Public License v3.0](LICENSE).

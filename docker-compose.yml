@@ -1,0 +1,27 @@
+services:
+  dkim-dashboard:
+    build:
+      context: .
+      args:
+        # Match the host opendkim user's UID/GID so the container
+        # can read/write keys and config files.
+        # Find yours with: id opendkim
+        APP_UID: ${APP_UID:-113}
+        APP_GID: ${APP_GID:-113}
+    ports:
+      - "${DASHBOARD_PORT:-3000}:3000"
+    volumes:
+      # Mount host OpenDKIM config into non-system paths
+      - ${OPENDKIM_CONFIG_DIR:-/etc/opendkim}:/data/opendkim
+      - ${OPENDKIM_CONF:-/etc/opendkim.conf}:/data/opendkim.conf:ro
+      # Mount PID file directory for service reload (SIGHUP)
+      - ${OPENDKIM_RUN_DIR:-/run/opendkim}:/data/run:ro
+    environment:
+      - OPENDKIM_CONFIG_DIR=/data/opendkim
+      - OPENDKIM_CONF=/data/opendkim.conf
+      - OPENDKIM_PID_FILE=/data/run/opendkim.pid
+    # Required for the reload feature — allows the container to send
+    # SIGHUP to the host's opendkim process via its PID file.
+    # Remove this if you don't need in-app reload.
+    pid: host
+    restart: unless-stopped
