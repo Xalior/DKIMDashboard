@@ -50,6 +50,10 @@ cp .env.example .env
 docker compose up -d
 ```
 
+## ⚠️ Security Notice
+
+This application has **no built-in authentication or access control**. All endpoints are unrestricted. Access management should be handled at your edge/ingress layer (e.g. nginx basic auth, reverse proxy IP allowlists, VPN, etc.). **Do not expose this application directly to the internet.**
+
 ## 📚 Documentation
 
 Full [architecture, API reference, and development docs](docs/README.md).
