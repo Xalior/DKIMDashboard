@@ -192,7 +192,7 @@ location / {
 The `data/` directory is gitignored and holds the OpenDKIM config tree the app reads and writes to. For local development, create it with the standard OpenDKIM file structure:
 
 ```
-data/etc/
+data/
 ├── opendkim.conf
 └── opendkim/
     ├── KeyTable
@@ -207,8 +207,8 @@ data/etc/
 Then point `.env.local` at it:
 
 ```env
-OPENDKIM_CONFIG_DIR=./data/etc/opendkim
-OPENDKIM_CONF=./data/etc/opendkim.conf
+OPENDKIM_CONFIG_DIR=./data/opendkim
+OPENDKIM_CONF=./data/opendkim.conf
 ```
 
 In production via Docker, the host's `/etc/opendkim` is mounted into the container at the same path — `data/` is not used.

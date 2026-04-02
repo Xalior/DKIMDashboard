@@ -28,8 +28,8 @@ cp .env.example .env.local
 Edit `.env.local` to point at your OpenDKIM configuration:
 
 ```env
-OPENDKIM_CONFIG_DIR=/etc/opendkim
-OPENDKIM_CONF=/etc/opendkim.conf
+OPENDKIM_CONFIG_DIR=./data/opendkim
+OPENDKIM_CONF=./data/opendkim.conf
 ```
 
 Then run:
