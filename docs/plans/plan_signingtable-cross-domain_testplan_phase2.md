@@ -1,6 +1,6 @@
 # Local test plan — Phase 2 KeyTable + Domains extras
 
-**Target:** `feature/keytable-thin` on a local dev box (nancy) **without** a running `opendkim` service. Builds on the Phase 1 testplan — Phase 1's sign-off is a prerequisite here. Real-mail / DNS / opendkim-reload checks are out of scope.
+**Target:** `feature/keytable-thin` on a local dev box (lucy) **without** a running `opendkim` service. Builds on the Phase 1 testplan — Phase 1's sign-off is a prerequisite here. Real-mail / DNS / opendkim-reload checks are out of scope.
 
 ## 0. Prerequisites
 
@@ -21,10 +21,10 @@ make ci     # lint → typecheck → test → build
 ```
 
 Expected:
-- [ ] `make lint` — no output
-- [ ] `make typecheck` — no output
-- [ ] `make test` — **76 passed** across 8 files (22 signing-table + 18 key-table + 10 primitives + 26 API handler tests)
-- [ ] `make build` — succeeds; route list includes `/api/rules/keys`, `/api/rules/keys/[id]`, `/rules/keys/[id]`, and **does not** include `/api/keys` (removed)
+- [x] `make lint` — no output
+- [x] `make typecheck` — no output
+- [x] `make test` — **76 passed** across 8 files (22 signing-table + 18 key-table + 10 primitives + 26 API handler tests)
+- [x] `make build` — succeeds; route list includes `/api/rules/keys`, `/api/rules/keys/[id]`, `/rules/keys/[id]`, and **does not** include `/api/keys` (removed)
 
 ## 2. Start the dev server
 
@@ -43,10 +43,10 @@ watch -n 0.5 'cat data/opendkim/SigningTable ; echo ---KEY--- ; cat data/opendki
 Click **Keys** in the navbar.
 
 Checks:
-- [ ] Table columns: `selectorDomain`, `Domain`, `Selector`, `Key path`, `Actions`. Each header has a `[?]` level-2 help button.
-- [ ] Rows match what's in `data/opendkim/KeyTable` (canonical entries show all four data columns).
-- [ ] Each row has a **View details** (eye icon) and **Regenerate** button. Regenerate is hidden for malformed rows (none yet).
-- [ ] "About this page" button in the header opens the level-3 `KeyEntriesPageHelp` modal.
+- [x] Table columns: `selectorDomain`, `Domain`, `Selector`, `Key path`, `Actions`. Each header has a `[?]` level-2 help button.
+- [x] Rows match what's in `data/opendkim/KeyTable` (canonical entries show all four data columns).
+- [x] Each row has a **View details** (eye icon) and **Regenerate** button. Regenerate is hidden for malformed rows (none yet).
+- [x] "About this page" button in the header opens the level-3 `KeyEntriesPageHelp` modal.
 
 ## 4. Malformed entry surfacing
 
@@ -59,10 +59,10 @@ printf '\nweirdSelector arbitrary:content\n' >> data/opendkim/KeyTable
 In the UI, hit **Refresh**.
 
 Checks:
-- [ ] A new row appears with a yellow **non-standard entry** badge.
-- [ ] The row spans the data columns and shows the raw line (`weirdSelector arbitrary:content`) as `<code>`.
-- [ ] The row has **View details** (eye) but **no Regenerate** button.
-- [ ] Clicking the inline `[?]` next to the badge opens `MalformedEntryHelp`.
+- [x] A new row appears with a yellow **non-standard entry** badge.
+- [x] The row spans the data columns and shows the raw line (`weirdSelector arbitrary:content`) as `<code>`.
+- [x] The row has **View details** (eye) but **no Regenerate** button.
+- [x] Clicking the inline `[?]` next to the badge opens `MalformedEntryHelp`.
 
 ## 5. Key entry detail — canonical
 
@@ -80,36 +80,36 @@ Checks:
 Click the eye on the hand-added `weirdSelector` row.
 
 Checks:
-- [ ] URL is `/rules/keys/<id>`.
-- [ ] Only one card renders: a yellow "non-standard entry" header + raw-line `<pre>` + explanation.
-- [ ] No disk-files or DNS cards.
-- [ ] Inline `[?]` opens `MalformedEntryHelp`.
+- [x] URL is `/rules/keys/<id>`.
+- [x] Only one card renders: a yellow "non-standard entry" header + raw-line `<pre>` + explanation.
+- [x] No disk-files or DNS cards.
+- [x] Inline `[?]` opens `MalformedEntryHelp`.
 
 ## 7. Deep-link
 
 Copy the URL of a canonical detail page, open in a fresh private window.
 
 Checks:
-- [ ] Page lands directly on the detail view for that entry — no round-trip via `/keys`.
-- [ ] Navbar **Keys** link shows as active.
+- [x] Page lands directly on the detail view for that entry — no round-trip via `/keys`.
+- [x] Navbar **Keys** link shows as active.
 
 ## 8. Regenerate still works + hand-edits survive
 
 On `/keys`, click **Regenerate** on a canonical row (pick one that has a private key file on disk — e.g. `nextbestnetwork.com`). Confirm the modal.
 
 Checks:
-- [ ] Regenerate succeeds, the follow-up modal shows the new BIND TXT record.
-- [ ] The hand-added `weirdSelector arbitrary:content` line from step 4 is **still present** byte-for-byte in `data/opendkim/KeyTable` afterwards.
-- [ ] `data/opendkim/keys/<domain>/mail.private` has a fresh timestamp; the `.txt` file alongside has a new public key.
+- [x] Regenerate succeeds, the follow-up modal shows the new BIND TXT record.
+- [x] The hand-added `weirdSelector arbitrary:content` line from step 4 is **still present** byte-for-byte in `data/opendkim/KeyTable` afterwards.
+- [x] `data/opendkim/keys/<domain>/mail.private` has a fresh timestamp; the `.txt` file alongside has a new public key.
 
 ## 9. /domains help retrofit
 
 Click **Domains** in the navbar.
 
 Checks:
-- [ ] "About this page" button next to Refresh / Add Domain opens `DomainsPageHelp` (level-3).
-- [ ] Each column header has a `[?]` button (Domain / From Pattern / Selector / DNS Status). Each opens its level-2 atom.
-- [ ] Click **Add Domain** — form labels each have a `[?]`; hovering the inputs shows tooltips. Cancel the modal.
+- [x] "About this page" button next to Refresh / Add Domain opens `DomainsPageHelp` (level-3).
+- [x] Each column header has a `[?]` button (Domain / From Pattern / Selector / DNS Status). Each opens its level-2 atom.
+- [x] Click **Add Domain** — form labels each have a `[?]`; hovering the inputs shows tooltips. Cancel the modal.
 
 ## 10. Narrow delete — two rules, delete one
 
@@ -120,28 +120,28 @@ Set up two rules referencing the same `(domain, selector)`:
 
 Both rules now point at `mail._domainkey.narrow.test`. Verify:
 
-- [ ] `data/opendkim/SigningTable` contains two lines for `mail._domainkey.narrow.test`.
-- [ ] `data/opendkim/KeyTable` contains exactly one line for `mail._domainkey.narrow.test`.
-- [ ] `/domains` lists two rows for `narrow.test` (one per rule).
+- [x] `data/opendkim/SigningTable` contains two lines for `mail._domainkey.narrow.test`.
+- [x] `data/opendkim/KeyTable` contains exactly one line for `mail._domainkey.narrow.test`.
+- [x] `/domains` lists two rows for `narrow.test` (one per rule).
 
 Now delete the `*@narrow.test` rule via `/domains` (the **trash** icon on the first of the two rows).
 
 Checks:
-- [ ] The confirmation modal copy says **"Remove this signing rule"** (not "Remove Domain") and shows the exact `pattern keyRef` it's about to remove.
-- [ ] After confirming: the deleted row is gone, but the other row (`*@alias.narrow.test → mail._domainkey.narrow.test`) is still present.
-- [ ] `data/opendkim/SigningTable` — only one rule remains for `mail._domainkey.narrow.test`.
-- [ ] `data/opendkim/KeyTable` — the entry is **still there** (key is still in use by the surviving rule).
-- [ ] `data/opendkim/keys/narrow.test/mail.private` and `mail.txt` still exist.
+- [x] The confirmation modal copy says **"Remove this signing rule"** (not "Remove Domain") and shows the exact `pattern keyRef` it's about to remove.
+- [x] After confirming: the deleted row is gone, but the other row (`*@alias.narrow.test → mail._domainkey.narrow.test`) is still present.
+- [x] `data/opendkim/SigningTable` — only one rule remains for `mail._domainkey.narrow.test`.
+- [x] `data/opendkim/KeyTable` — the entry is **still there** (key is still in use by the surviving rule).
+- [x] `data/opendkim/keys/narrow.test/mail.private` and `mail.txt` still exist.
 
 ## 11. Narrow delete — removing the last rule
 
 Delete the remaining `*@alias.narrow.test` rule via `/domains`.
 
 Checks:
-- [ ] Row is gone from `/domains` and `/rules/signing`.
-- [ ] `data/opendkim/SigningTable` — no rules remain for `mail._domainkey.narrow.test`.
-- [ ] `data/opendkim/KeyTable` — the entry for `mail._domainkey.narrow.test` is now **removed** (last reference gone).
-- [ ] `data/opendkim/keys/narrow.test/*` files are **still on disk** (never auto-deleted, per confirmation copy).
+- [x] Row is gone from `/domains` and `/rules/signing`.
+- [x] `data/opendkim/SigningTable` — no rules remain for `mail._domainkey.narrow.test`.
+- [x] `data/opendkim/KeyTable` — the entry for `mail._domainkey.narrow.test` is now **removed** (last reference gone).
+- [x] `data/opendkim/keys/narrow.test/*` files are **still on disk** (never auto-deleted, per confirmation copy).
 
 ## 12. Hand-edit preservation across delete + narrow-delete
 
@@ -155,19 +155,19 @@ Hand-add a comment above an entry:
 Use the UI to exercise Add Domain and Delete Domain with the narrow-delete flow.
 
 Checks:
-- [ ] Hand-added comments in **SigningTable** survive every UI add/delete.
-- [ ] Hand-added comments in **KeyTable** survive every UI add/delete — including the deletion of the last rule referencing a key (the comment's host entry gets removed, but unrelated comments / entries stay put).
-- [ ] The hand-added `weirdSelector arbitrary:content` line from step 4 has survived everything in this test so far.
+- [x] Hand-added comments in **SigningTable** survive every UI add/delete.
+- [x] Hand-added comments in **KeyTable** survive every UI add/delete — including the deletion of the last rule referencing a key (the comment's host entry gets removed, but unrelated comments / entries stay put).
+- [x] The hand-added `weirdSelector arbitrary:content` line from step 4 has survived everything in this test so far.
 
 ## 13. Keyboard / a11y spot check
 
 On `/domains`, Add Domain modal:
-- [ ] Tab cycles through Domain → Selector → From Pattern.
-- [ ] VoiceOver / ChromeVox announces each input's tooltip content when focused (`aria-describedby` is wired).
+- [x] Tab cycles through Domain → Selector → From Pattern.
+- [x] VoiceOver / ChromeVox announces each input's tooltip content when focused (`aria-describedby` is wired).
 
 On `/rules/keys/[id]`:
-- [ ] Tab reaches every `[?]` help button.
-- [ ] Enter on a `[?]` opens the modal; Esc closes it.
+- [x] Tab reaches every `[?]` help button.
+- [x] Enter on a `[?]` opens the modal; Esc closes it.
 
 ## 14. Teardown
 
