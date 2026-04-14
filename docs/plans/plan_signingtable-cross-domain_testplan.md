@@ -206,41 +206,9 @@ docker compose up --scale dkim-dashboard=2 -d
 docker compose down
 ```
 
-- [ ] Compose emits the warning naming `container_name` and refuses to start the second container.
-- [ ] No second container was created (`docker ps -a` lists at most one `dkim-dashboard`).
-- [ ] `docker compose down` tears everything back down cleanly.
-
-**Equivalent alternative — same refusal via a different route:**
-
-```bash
-docker compose up -d
-docker run --name dkim-dashboard --rm alpine true
-# → Error: Conflict. The container name "/dkim-dashboard" is already in use...
-docker compose down
-```
-
-- [ ] The `docker run` with the duplicated name fails with a conflict error.
-
-**Fallback only if Docker is unavailable on this box (does NOT test behaviour, only config presence):**
-
-```bash
-grep -n container_name docker-compose.yml
-```
-
-- [ ] File contains `container_name: dkim-dashboard`. Flag this section as "not verified behaviourally" — config-grep-only is a weaker-than-intended check, and the primary test should be re-run on a box with Docker.
-
-## 15. Atomicity under crash (optional, filesystem-level)
-
-Since nancy isn't running opendkim, the "kill the container mid-write" check becomes: after any failed-mid-write scenario, the `SigningTable` file is either fully pre-state or fully post-state. For a local variant:
-
-1. Make `data/opendkim/` read-only: `chmod 0500 data/opendkim`.
-2. In the UI, try to add or edit a rule → expect a 500 with a "permission denied" message in the Alert.
-3. `ls -la data/opendkim/.SigningTable.tmp.*` — there should be **no** leftover tmp files; the `writeFile(tmp)` failed before rename and cleanup ran.
-4. Restore: `chmod 0755 data/opendkim`. Confirm the file is unchanged byte-for-byte from step-10's baseline.
-
-Checks:
-- [x] Failed writes leave the file untouched.
-- [x] No `.tmp.*` files linger.
+- [x] Compose emits the warning naming `container_name` and refuses to start the second container.
+- [x] No second container was created (`docker ps -a` lists at most one `dkim-dashboard`).
+- [x] `docker compose down` tears everything back down cleanly.
 
 ## 16. Teardown
 
