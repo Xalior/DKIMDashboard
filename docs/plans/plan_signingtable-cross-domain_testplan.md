@@ -194,15 +194,39 @@ Then delete that domain from `/domains`:
 
 ## 14. Single-instance invariant (Docker required — optional locally)
 
-Only if Docker is installed locally:
+The invariant the plan wants proven is: the compose file has a fixed `container_name`, so Docker refuses to run a second instance. The `docker compose up --scale` flag varies across compose versions, so the test plan gives three equivalent checks — any one passing is sufficient.
+
+**Option A — inspect the resolved config (no daemon needed):**
 
 ```bash
-docker compose up --scale dkim-dashboard=2
+docker compose config | grep container_name
 ```
 
-- [ ] Compose refuses with an error naming `container_name`.
+- [ ] Output contains `container_name: dkim-dashboard`.
 
-If Docker isn't set up on nancy, skip this. The CI-equivalent check is the `docker-compose.yml` diff — `container_name: dkim-dashboard` is present on the service.
+**Option B — trigger the conflict directly:**
+
+```bash
+docker compose up -d
+docker run --name dkim-dashboard --rm alpine true
+# → Error: Conflict. The container name "/dkim-dashboard" is already in use...
+docker compose down
+```
+
+- [ ] The second `docker run` fails with a name-conflict error.
+
+**Option C — compose scale subcommand:**
+
+```bash
+docker compose up -d
+docker compose scale dkim-dashboard=2
+# → Same conflict error
+docker compose down
+```
+
+- [ ] `docker compose scale` refuses with an error naming `container_name`.
+
+If Docker isn't set up on nancy, skip this section entirely. The CI-equivalent check is the `docker-compose.yml` diff — `container_name: dkim-dashboard` is present on the service.
 
 ## 15. Atomicity under crash (optional, filesystem-level)
 
