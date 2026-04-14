@@ -3,6 +3,7 @@
 **Status:** In Progress
 **Branch:** `feature/signingtable-cross-domain`
 **Plan:** [plan_signingtable-cross-domain.md](plan_signingtable-cross-domain.md)
+**Test plan (local, no live server):** [plan_signingtable-cross-domain_testplan.md](plan_signingtable-cross-domain_testplan.md)
 
 ## Tasks
 
@@ -16,7 +17,7 @@
   - [x] Help surface (HelpModal, AboutThisPage, RowHelp, FieldTooltip + content)
   - [x] Navbar + /domains back-link
   - [x] Automated success criteria (`make test` 52 green, `make typecheck` clean, `make lint` clean, `make build` succeeds with all new routes registered)
-  - [ ] Manual success criteria (**awaiting user verification on ursa**)
+  - [ ] Manual success criteria (**awaiting local verification on nancy** — see [testplan](plan_signingtable-cross-domain_testplan.md); live-server criteria from the plan are deferred since alpha will not be tested on a production host)
 - [ ] Phase 2: KeyTable thin (read-only UI, round-trip writer) — re-review after Phase 1
 - [ ] Phase 3: TrustedHosts first-class — re-review after Phase 2
 
