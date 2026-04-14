@@ -275,3 +275,26 @@ export async function saveSigningTable(parsed: ParsedSigningTable): Promise<void
   const path = signingTablePath();
   await withLock(path, () => writeFileAtomic(path, serializeSigningTable(parsed)));
 }
+
+/**
+ * Atomic read-modify-write of the on-disk SigningTable.
+ *
+ * The read, mutator, serialize, and write all run under the same per-path
+ * async lock, so concurrent requests within this process see consistent
+ * state rather than racing on a read-then-write window.
+ *
+ * Returns the post-write parsed state, so callers can project the result
+ * (e.g. look up the new rule's id) without re-parsing.
+ */
+export async function mutateSigningTable(
+  mutator: (parsed: ParsedSigningTable) => ParsedSigningTable,
+): Promise<ParsedSigningTable> {
+  const path = signingTablePath();
+  return withLock(path, async () => {
+    const raw = await readFile(path, 'utf-8');
+    const parsed = parseSigningTable(raw);
+    const next = mutator(parsed);
+    await writeFileAtomic(path, serializeSigningTable(next));
+    return next;
+  });
+}
