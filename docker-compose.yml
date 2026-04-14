@@ -1,5 +1,11 @@
 services:
   dkim-dashboard:
+    # Fixed container_name enforces the single-instance invariant:
+    # Compose refuses `docker compose up --scale dkim-dashboard=N` when
+    # container_name is set. The dashboard's in-process concurrency model
+    # (per-path async mutex over /etc/opendkim writes) is only safe for a
+    # single writer against a given config tree — see README § Deployment.
+    container_name: dkim-dashboard
     build:
       context: .
       args:
