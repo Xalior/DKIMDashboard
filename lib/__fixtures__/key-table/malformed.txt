@@ -1,0 +1,8 @@
+# Canonical entry first for contrast
+mail._domainkey.nextbestnetwork.com nextbestnetwork.com:mail:/etc/opendkim/keys/nextbestnetwork.com/mail.private
+# Only two colon-separated parts in the value — malformed, kept verbatim
+weirdSelector arbitrary:content
+# Single-token line — also malformed
+placeholder_only
+# Trailing inline comment is not parsed out; it rides inside the rawLine
+mail._domainkey.example.com example.com:mail:/etc/opendkim/keys/example.com/mail.private   # TODO: verify path
