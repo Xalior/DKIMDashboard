@@ -18,6 +18,10 @@ import {
   removeEntry,
   mutateKeyTable,
 } from './key-table';
+import {
+  parseTrustedHosts as parseTrustedHostsV2,
+  listEntries as listTrustedHostEntries,
+} from './trusted-hosts';
 import { DuplicateEntryError } from './errors';
 
 const CANONICAL_CONFIG_DIR = '/etc/opendkim';
@@ -82,12 +86,14 @@ export function parseKeyTable(content: string): { selectorDomain: string; domain
     }));
 }
 
+/**
+ * Legacy projection of TrustedHosts content to the pre-Phase-3 shape.
+ * New code should prefer `listEntries(parseTrustedHostsV2(raw).lines)` from
+ * `./trusted-hosts`, which preserves ids, inline comments, `refile:` flags
+ * and the full round-trip model.
+ */
 export function parseTrustedHosts(content: string): TrustedHost[] {
-  return content
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line && !line.startsWith('#'))
-    .map(value => ({ value }));
+  return listTrustedHostEntries(parseTrustedHostsV2(content).lines).map(({ value }) => ({ value }));
 }
 
 // --- Reading ---
@@ -291,11 +297,6 @@ export async function removeDomain(
     }
     return { ...parsed, lines: nextLines };
   });
-}
-
-export async function saveTrustedHosts(hosts: string[]): Promise<void> {
-  const hostsPath = join(configDir(), 'TrustedHosts');
-  await writeFile(hostsPath, hosts.join('\n') + '\n');
 }
 
 export async function reloadService(): Promise<{ success: boolean; message: string }> {

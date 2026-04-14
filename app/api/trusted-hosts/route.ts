@@ -1,25 +1,49 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { readTrustedHosts, parseTrustedHosts, saveTrustedHosts } from '@/lib/opendkim';
+import {
+  addEntry,
+  listEntries,
+  mutateTrustedHosts,
+  parseTrustedHosts,
+  readTrustedHostsRaw,
+  type TrustedHostEntry,
+} from '@/lib/trusted-hosts';
+import { errorResponse, ValidationError } from '@/lib/api-errors';
 
-export async function GET() {
+export async function GET(): Promise<Response> {
   try {
-    const raw = await readTrustedHosts();
-    const hosts = parseTrustedHosts(raw);
-    return NextResponse.json(hosts);
+    const parsed = parseTrustedHosts(await readTrustedHostsRaw());
+    const entries = listEntries(parsed.lines);
+    return Response.json(entries);
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return errorResponse(err);
   }
 }
 
-export async function PUT(req: NextRequest) {
+export async function POST(req: Request): Promise<Response> {
   try {
-    const { hosts } = await req.json();
-    if (!Array.isArray(hosts)) {
-      return NextResponse.json({ error: 'hosts must be an array of strings' }, { status: 400 });
+    const body = await req.json().catch(() => ({}));
+    const { value, position } = body as { value?: unknown; position?: unknown };
+
+    if (typeof value !== 'string' || value.trim() === '') {
+      throw new ValidationError('value is required and must be a non-empty string');
     }
-    await saveTrustedHosts(hosts);
-    return NextResponse.json({ success: true });
+    if (position !== undefined && (typeof position !== 'number' || !Number.isFinite(position))) {
+      throw new ValidationError('position, if provided, must be a finite number');
+    }
+
+    const postState = await mutateTrustedHosts((parsed) => ({
+      ...parsed,
+      lines: addEntry(parsed.lines, {
+        value,
+        ...(position !== undefined ? { position: position as number } : {}),
+      }),
+    }));
+
+    const entry: TrustedHostEntry | undefined = listEntries(postState.lines).find(
+      (e) => e.value === value,
+    );
+    if (!entry) throw new Error('internal: newly added trusted host not found in post-state');
+    return Response.json({ entry }, { status: 201 });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return errorResponse(err);
   }
 }
