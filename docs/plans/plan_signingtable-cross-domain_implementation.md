@@ -19,6 +19,7 @@
   - [x] Automated success criteria (`make test` 52 green, `make typecheck` clean, `make lint` clean, `make build` succeeds with all new routes registered)
   - [ ] Manual success criteria (**awaiting local verification on nancy** — see [testplan](plan_signingtable-cross-domain_testplan.md); live-server criteria from the plan are deferred since alpha will not be tested on a production host)
 - [ ] Phase 2: KeyTable thin (read-only UI, round-trip writer) — re-review after Phase 1
+  - [ ] **Followup (fold into Phase 2 scope):** retro-fit the 3-tier help surface onto `/domains` for consistency with `/rules/signing`. Less confusing page, so lower urgency, but the visual inconsistency is noticeable once the signing-rules pages ship. Reuses the existing `HelpModal` / `AboutThisPage` / `RowHelp` / `FieldTooltip` components; needs new content atoms only (e.g. `DomainsPageHelp`, `FromPatternHelp`, `SelectorHelp`).
 - [ ] Phase 3: TrustedHosts first-class — re-review after Phase 2
 
 ## Progress Log
@@ -40,6 +41,7 @@
 - `.gitignore` had a stray trailing-newline delete in the working tree at start; discarded as incidental.
 - Project uses **pnpm** (active lockfile). Shell aliases `npm` → `pnpm`. Makefile uses `npx` which resolves against either. No decision taken on removing the stale `package-lock.json`; left in place since it is unmaintained but not causing harm.
 - **Plan divergence — ParsedSigningTable wrapper.** The plan's stated `parseSigningTable(content): SigningTableLine[]` signature cannot encode EOL + trailing-newline metadata without either side-channel state or synthetic list entries. The module instead exports `ParsedSigningTable { lines, eol, hasFinalNewline }`. CRUD functions still operate on `SigningTableLine[]` per the plan; only parse / serialize / saveSigningTable deal with the wrapper. API signatures downstream are unaffected.
+- **Phase 2 scope creep (accepted):** `/domains` page will gain the 3-tier help surface alongside the KeyTable work, so the dashboard's help language is consistent across Domains / Signing Rules / Keys after Phase 2 lands. Surfaced during Phase 1 local testing.
 
 ## Blockers
 
