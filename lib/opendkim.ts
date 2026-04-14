@@ -1,8 +1,17 @@
-import { readFile, writeFile, mkdir, chmod, readdir } from 'fs/promises';
+import { readFile, writeFile, mkdir, readdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { generateKeyPairSync, createPublicKey } from 'crypto';
 import { resolveTxt } from 'dns/promises';
+
+import {
+  parseSigningTable as parseSigningTableV2,
+  listRules,
+  addRule,
+  removeRule,
+  mutateSigningTable,
+} from './signing-table';
+import { DuplicateEntryError } from './errors';
 
 const CANONICAL_CONFIG_DIR = '/etc/opendkim';
 
@@ -34,15 +43,17 @@ export interface TrustedHost {
 
 // --- Parsing ---
 
+/**
+ * Legacy projection of SigningTable content to the pre-Phase-1 shape.
+ * New code should prefer `listRules(parseSigningTableV2(raw).lines)` from
+ * `./signing-table`, which preserves ids and the full round-trip model.
+ * Retained for any remaining callers that expect the old shape.
+ */
 export function parseSigningTable(content: string): { pattern: string; selectorDomain: string }[] {
-  return content
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line && !line.startsWith('#'))
-    .map(line => {
-      const parts = line.split(/\s+/);
-      return { pattern: parts[0], selectorDomain: parts[1] };
-    });
+  return listRules(parseSigningTableV2(content).lines).map((r) => ({
+    pattern: r.pattern,
+    selectorDomain: r.keyRef,
+  }));
 }
 
 export function parseKeyTable(content: string): { selectorDomain: string; domain: string; selector: string; keyPath: string }[] {
@@ -91,14 +102,14 @@ export async function readConfig(): Promise<string> {
 
 export async function getDomains(): Promise<DomainEntry[]> {
   const [signingRaw, keyRaw] = await Promise.all([readSigningTable(), readKeyTable()]);
-  const signing = parseSigningTable(signingRaw);
+  const rules = listRules(parseSigningTableV2(signingRaw).lines);
   const keys = parseKeyTable(keyRaw);
 
-  return signing.map(s => {
-    const k = keys.find(k => k.selectorDomain === s.selectorDomain);
+  return rules.map((r) => {
+    const k = keys.find((k) => k.selectorDomain === r.keyRef);
     return {
-      pattern: s.pattern,
-      selectorDomain: s.selectorDomain,
+      pattern: r.pattern,
+      selectorDomain: r.keyRef,
       domain: k?.domain || '',
       selector: k?.selector || '',
       keyPath: k?.keyPath || '',
@@ -176,12 +187,19 @@ export async function addDomain(domain: string, selector: string, fromPattern: s
   const txtPath = join(keyDir, `${selector}.txt`);
   await writeFile(txtPath, bindRecord + '\n', { mode: 0o644 });
 
-  // Append to SigningTable
-  const signingPath = join(configDir(), 'SigningTable');
-  const signingContent = await readFile(signingPath, 'utf-8');
-  const signingLine = `${fromPattern} ${selector}._domainkey.${domain}`;
-  if (!signingContent.includes(signingLine)) {
-    await writeFile(signingPath, signingContent.trimEnd() + '\n' + signingLine + '\n');
+  // Append to SigningTable via the round-trip-safe writer. The whole
+  // read-modify-write runs under a per-path mutex. Idempotent: if a rule
+  // with the same (pattern, keyRef) already exists, skip (matches the
+  // pre-refactor .includes() check).
+  const selectorDomain = `${selector}._domainkey.${domain}`;
+  try {
+    await mutateSigningTable((parsed) => ({
+      ...parsed,
+      lines: addRule(parsed.lines, { pattern: fromPattern, keyRef: selectorDomain }),
+    }));
+  } catch (err) {
+    if (!(err instanceof DuplicateEntryError)) throw err;
+    // Identical rule already present — no-op, matches legacy behaviour.
   }
 
   // Append to KeyTable (always use canonical production path)
@@ -199,16 +217,22 @@ export async function addDomain(domain: string, selector: string, fromPattern: s
 export async function removeDomain(domain: string, selector: string): Promise<void> {
   const selectorDomain = `${selector}._domainkey.${domain}`;
 
-  // Remove from SigningTable
-  const signingPath = join(configDir(), 'SigningTable');
-  const signingContent = await readFile(signingPath, 'utf-8');
-  const newSigning = signingContent
-    .split('\n')
-    .filter(line => !line.includes(selectorDomain))
-    .join('\n');
-  await writeFile(signingPath, newSigning);
+  // Remove from SigningTable via the round-trip-safe writer, under the
+  // per-path mutex. Removes every rule whose keyRef matches selectorDomain
+  // (preserves today's substring-match behaviour for legacy duplicates).
+  await mutateSigningTable((parsed) => {
+    const matchingIds = parsed.lines.flatMap((l) =>
+      l.kind === 'rule' && l.keyRef === selectorDomain ? [l.id] : [],
+    );
+    let nextLines = parsed.lines;
+    for (const id of matchingIds) {
+      nextLines = removeRule(nextLines, id);
+    }
+    return { ...parsed, lines: nextLines };
+  });
 
-  // Remove from KeyTable
+  // Remove from KeyTable — Phase 2 will route this through a round-trip-safe
+  // writer. For now the existing substring filter is retained.
   const keyTablePath = join(configDir(), 'KeyTable');
   const keyTableContent = await readFile(keyTablePath, 'utf-8');
   const newKeyTable = keyTableContent

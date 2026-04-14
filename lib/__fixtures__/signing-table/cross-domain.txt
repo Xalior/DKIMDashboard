@@ -1,0 +1,2 @@
+*@ursa.xalior.com  mail._domainkey.clientmail.xalior.com
+*@id.nextbestnetwork.com mail._domainkey.nextbestnetwork.com

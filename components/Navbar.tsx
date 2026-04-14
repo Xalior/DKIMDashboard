@@ -23,6 +23,13 @@ export default function AppNavbar() {
             <Nav.Link as={Link} href="/domains" active={pathname === '/domains'}>
               <i className="bi bi-globe me-1"></i>Domains
             </Nav.Link>
+            <Nav.Link
+              as={Link}
+              href="/rules/signing"
+              active={pathname === '/rules/signing' || pathname.startsWith('/rules/signing/')}
+            >
+              <i className="bi bi-list-ul me-1"></i>Signing Rules
+            </Nav.Link>
             <Nav.Link as={Link} href="/keys" active={pathname === '/keys'}>
               <i className="bi bi-key me-1"></i>Keys
             </Nav.Link>
