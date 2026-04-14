@@ -33,6 +33,11 @@ export async function PUT(req: Request, ctx: Context): Promise<Response> {
     if (typeof value !== 'string' || value.trim() === '') {
       throw new ValidationError('value is required and must be a non-empty string');
     }
+    if (/[\s,]/.test(value)) {
+      throw new ValidationError(
+        'value must not contain whitespace or commas — add multiple entries one at a time',
+      );
+    }
     if (inlineComment !== undefined && typeof inlineComment !== 'string') {
       throw new ValidationError('inlineComment, if provided, must be a string');
     }

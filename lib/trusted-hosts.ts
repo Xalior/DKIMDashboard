@@ -52,20 +52,26 @@ function makeBaseId(value: string): string {
 
 /**
  * Split a trimmed non-empty non-comment line into `(value, inlineComment?)`.
- * TrustedHosts entries are single-token; any whitespace-separated trailing
- * `#...` on the same line is captured as an inline comment. Value tokens may
- * themselves contain `#` without a leading space (e.g. a `refile:/path#foo`
- * shouldn't be confused with an inline comment); we only cut at a `#` that
- * follows whitespace.
+ *
+ * Strategy: find the first whitespace-preceded `#`; everything left of it is
+ * the value, everything from the `#` onwards is the inline comment. If no
+ * such `#` exists, the whole line is the value.
+ *
+ * This is deliberately permissive about what a "value" contains — a line
+ * like `10.0.0.0/8, 192.168.1.0/24 # internals` still separates cleanly into
+ * a compound (if semantically-dubious) value plus the `# internals` comment,
+ * so the inline comment stays visible in the UI. Rejecting malformed values
+ * is a validation concern handled at the API and form layers; the parser's
+ * job is round-trip fidelity, not input policing.
+ *
+ * `#` characters inside the value itself (e.g. `refile:/path/with#anchor`)
+ * are preserved because we only cut at a `#` that follows whitespace.
  */
 function splitEntryTokens(trimmedLine: string): { value: string; inlineComment?: string } {
-  const m = trimmedLine.match(/^(\S+)(?:\s+(#.*))?$/);
+  const m = trimmedLine.match(/^(.+?)\s+(#.*)$/);
   if (m) {
-    return m[2] ? { value: m[1], inlineComment: m[2] } : { value: m[1] };
+    return { value: m[1].trim(), inlineComment: m[2] };
   }
-  // Line has multiple non-#-leading tokens; OpenDKIM would likely ignore
-  // everything after the first token, but we preserve the full string as
-  // the value (round-trip via rawLine stays correct regardless).
   return { value: trimmedLine };
 }
 

@@ -64,6 +64,23 @@ describe('parseTrustedHosts / serializeTrustedHosts (round-trip)', () => {
     ]);
   });
 
+  it('extracts the inline comment even when the value has internal whitespace', () => {
+    // Regression: a user on /trusted-hosts/new entered
+    // "10.0.0.0/8, 192.168.1.0/24" in the Value field plus "internals" in
+    // the inline-comment field. The stored line became
+    // "10.0.0.0/8, 192.168.1.0/24 # internals". The parser must still
+    // identify "# internals" as the inline comment so the UI can display
+    // it and a subsequent edit can carry it through.
+    const content = '10.0.0.0/8, 192.168.1.0/24 # internals\n';
+    const parsed = parseTrustedHosts(content);
+    const entries = listEntries(parsed.lines);
+    expect(entries).toHaveLength(1);
+    expect(entries[0].value).toBe('10.0.0.0/8, 192.168.1.0/24');
+    expect(entries[0].inlineComment).toBe('# internals');
+    // Round-trip still byte-for-byte (rawLine path).
+    expect(serializeTrustedHosts(parsed)).toBe(content);
+  });
+
   it('captures inline trailing comments', async () => {
     const content = await loadFixture('inline-comments.txt');
     const parsed = parseTrustedHosts(content);

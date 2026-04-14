@@ -26,6 +26,11 @@ export async function POST(req: Request): Promise<Response> {
     if (typeof value !== 'string' || value.trim() === '') {
       throw new ValidationError('value is required and must be a non-empty string');
     }
+    if (/[\s,]/.test(value)) {
+      throw new ValidationError(
+        'value must not contain whitespace or commas — add multiple entries one at a time',
+      );
+    }
     if (position !== undefined && (typeof position !== 'number' || !Number.isFinite(position))) {
       throw new ValidationError('position, if provided, must be a finite number');
     }

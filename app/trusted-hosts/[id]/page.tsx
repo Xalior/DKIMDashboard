@@ -218,12 +218,15 @@ export default function EditTrustedHostPage({ params }: PageProps) {
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   required
+                  pattern="[^\s,]+"
+                  title="Single token — no whitespace or commas."
                   aria-describedby="value-tooltip"
                   autoComplete="off"
                 />
               </FieldTooltip>
               <Form.Text className="text-muted">
-                Editing this entry generates a new id, so the URL will change after save.
+                No whitespace or commas in the value. Editing this entry generates a new id, so
+                the URL will change after save.
               </Form.Text>
             </Form.Group>
 

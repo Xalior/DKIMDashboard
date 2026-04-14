@@ -119,16 +119,19 @@ export default function NewTrustedHostPage() {
                 <Form.Control
                   id="value"
                   type="text"
-                  placeholder="127.0.0.1, 10.0.0.0/8, mail.example.com, refile:/etc/opendkim/IgnoreHosts"
+                  placeholder="127.0.0.1   or   10.0.0.0/8   or   mail.example.com   or   refile:/etc/opendkim/IgnoreHosts"
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   required
+                  pattern="[^\s,]+"
+                  title="Single token — no whitespace or commas. Add multiple entries one at a time."
                   aria-describedby="value-tooltip"
                   autoComplete="off"
                 />
               </FieldTooltip>
               <Form.Text className="text-muted">
-                One entry per line on disk. Duplicates are rejected.
+                One entry per line on disk. No whitespace or commas in the value — add multiple
+                entries one at a time. Duplicates are rejected.
               </Form.Text>
             </Form.Group>
 

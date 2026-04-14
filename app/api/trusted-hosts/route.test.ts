@@ -108,6 +108,18 @@ describe('/api/trusted-hosts', () => {
       expect(res.status).toBe(409);
     });
 
+    it('returns 400 when value contains whitespace', async () => {
+      await seed('single-entry.txt');
+      const res = await POST(jsonRequest('POST', { value: '10.0.0.0/8 192.168.1.0/24' }));
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 when value contains a comma', async () => {
+      await seed('single-entry.txt');
+      const res = await POST(jsonRequest('POST', { value: '10.0.0.0/8,192.168.1.0/24' }));
+      expect(res.status).toBe(400);
+    });
+
     it('preserves hand-edited comments across a successful write', async () => {
       await seed('with-comments.txt');
       const res = await POST(jsonRequest('POST', { value: '172.16.0.0/12' }));
