@@ -31,6 +31,15 @@ interface TrustedHostEntry {
   inlineComment?: string;
 }
 
+/**
+ * Strip the leading '#' + optional whitespace from an inline-comment string
+ * for UI display. The '#' lives in the on-disk canonical form; the UI treats
+ * the comment's text body as the user-facing value.
+ */
+function commentBody(inlineComment: string | undefined): string {
+  return inlineComment ? inlineComment.replace(/^#\s*/, '') : '';
+}
+
 export default function TrustedHostsPage() {
   const router = useRouter();
   const [entries, setEntries] = useState<TrustedHostEntry[]>([]);
@@ -149,7 +158,7 @@ export default function TrustedHostsPage() {
                   </td>
                   <td>
                     {e.inlineComment ? (
-                      <span className="text-muted small font-monospace">{e.inlineComment}</span>
+                      <span className="text-muted small">{commentBody(e.inlineComment)}</span>
                     ) : (
                       <span className="text-muted small fst-italic">—</span>
                     )}

@@ -37,6 +37,15 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+/**
+ * Strip the leading '#' + optional whitespace from the stored inline
+ * comment so the edit input shows the plain text body. The '#' is a
+ * storage / serialization detail — the UI re-adds it on save.
+ */
+function commentBody(inlineComment: string | undefined): string {
+  return inlineComment ? inlineComment.replace(/^#\s*/, '') : '';
+}
+
 export default function EditTrustedHostPage({ params }: PageProps) {
   const { id } = use(params);
   const router = useRouter();
@@ -66,7 +75,7 @@ export default function EditTrustedHostPage({ params }: PageProps) {
         if (!alive || !body) return;
         setEntry(body.entry);
         setValue(body.entry.value);
-        setInlineComment(body.entry.inlineComment ?? '');
+        setInlineComment(commentBody(body.entry.inlineComment));
         setHadInlineComment(body.entry.inlineComment !== undefined);
       })
       .catch((err: Error) => {
