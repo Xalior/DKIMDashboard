@@ -226,8 +226,8 @@ export async function saveTrustedHosts(hosts: string[]): Promise<void> {
 export async function reloadService(): Promise<{ success: boolean; message: string }> {
   try {
     const pid = (await readFile(pidFile(), 'utf-8')).trim();
-    process.kill(parseInt(pid, 10), 'SIGHUP');
-    return { success: true, message: `Sent SIGHUP to OpenDKIM (PID ${pid})` };
+    process.kill(parseInt(pid, 10), 'SIGUSR1');
+    return { success: true, message: `Sent SIGUSR1 to OpenDKIM (PID ${pid})` };
   } catch (err) {
     return { success: false, message: `Failed to reload: ${err}` };
   }
