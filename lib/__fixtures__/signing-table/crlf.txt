@@ -1,0 +1,3 @@
+# CRLF fixture — round-trip must preserve \r\n line endings
+*@id.nextbestnetwork.com mail._domainkey.nextbestnetwork.com
+*@ursa.xalior.com  mail._domainkey.clientmail.xalior.com
