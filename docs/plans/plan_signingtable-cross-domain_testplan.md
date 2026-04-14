@@ -219,12 +219,33 @@ Checks:
 
 ## 16. Teardown
 
+`data/` is gitignored — `git checkout` won't restore it. Reset the seed from the bundled tarball:
+
 ```bash
-git checkout -- data/opendkim/
-rm -rf .next
+rm -rf data/opendkim
+tar -xzf data/opendkim_conf.tar.gz -C /tmp
+mv /tmp/etc/opendkim data/opendkim
+rm -rf /tmp/etc
 ```
 
-Optional: stop the dev server.
+Or just re-write the two seed files by hand:
+
+```bash
+cat > data/opendkim/SigningTable <<'EOF'
+*@id.nextbestnetwork.com mail._domainkey.nextbestnetwork.com
+*@example.com mail._domainkey.example.com
+EOF
+cat > data/opendkim/KeyTable <<'EOF'
+mail._domainkey.nextbestnetwork.com nextbestnetwork.com:mail:/etc/opendkim/keys/nextbestnetwork.com/mail.private
+mail._domainkey.example.com example.com:mail:/etc/opendkim/keys/example.com/mail.private
+EOF
+```
+
+Optionally clear the Next build cache and stop the dev server:
+
+```bash
+rm -rf .next
+```
 
 ---
 
