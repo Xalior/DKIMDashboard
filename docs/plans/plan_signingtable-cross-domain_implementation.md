@@ -1,13 +1,13 @@
 ## Implementation: Cross-domain SigningTable entries in DKIM Dashboard
 
-**Status:** In Progress
+**Status:** Phase 1 Complete — Phase 2 Re-review Pending
 **Branch:** `feature/signingtable-cross-domain`
 **Plan:** [plan_signingtable-cross-domain.md](plan_signingtable-cross-domain.md)
 **Test plan (local, no live server):** [plan_signingtable-cross-domain_testplan.md](plan_signingtable-cross-domain_testplan.md)
 
 ## Tasks
 
-- [ ] Phase 1: SigningTable first-class + scaffolding
+- [x] Phase 1: SigningTable first-class + scaffolding — **complete**
   - [x] Scaffolding (Makefile, vitest, package.json scripts, .gitignore, docker-compose container_name, README)
   - [x] Atomic-fs + write-lock + errors (libs + tests)
   - [x] signing-table parser/writer + fixtures + tests
@@ -17,7 +17,7 @@
   - [x] Help surface (HelpModal, AboutThisPage, RowHelp, FieldTooltip + content)
   - [x] Navbar + /domains back-link
   - [x] Automated success criteria (`make test` 52 green, `make typecheck` clean, `make lint` clean, `make build` succeeds with all new routes registered)
-  - [ ] Manual success criteria (**awaiting local verification on nancy** — see [testplan](plan_signingtable-cross-domain_testplan.md); live-server criteria from the plan are deferred since alpha will not be tested on a production host)
+  - [x] Manual success criteria — all non-optional sections signed off on nancy via [testplan](plan_signingtable-cross-domain_testplan.md). Live-server criteria from the plan (real mail + DNS + `dkim=pass` verification, mid-write container kill) remain deferred as agreed — alpha is not being tested on a production host.
 - [ ] Phase 2: KeyTable thin (read-only UI, round-trip writer) — re-review after Phase 1
   - [ ] **Followup (fold into Phase 2 scope):** retro-fit the 3-tier help surface onto `/domains` for consistency with `/rules/signing`. Less confusing page, so lower urgency, but the visual inconsistency is noticeable once the signing-rules pages ship. Reuses the existing `HelpModal` / `AboutThisPage` / `RowHelp` / `FieldTooltip` components; needs new content atoms only (e.g. `DomainsPageHelp`, `FromPatternHelp`, `SelectorHelp`).
 - [ ] Phase 3: TrustedHosts first-class — re-review after Phase 2
@@ -34,6 +34,7 @@
 - 2026-04-14 — Help surface (57ce325): HelpModal, AboutThisPage, RowHelp, FieldTooltip + level-3 SigningRulesPageHelp and level-2 SigningRulesAtoms.
 - 2026-04-14 — Signing Rules UI pages (28bdd27): list with reorder/delete, new-rule form, edit/delete [id] page. Navbar link + Domains back-link (0033a54).
 - 2026-04-14 — **Phase 1 Automated Success Criteria all green.** 52 vitest tests, tsc --noEmit clean, eslint clean, next build succeeds with /rules/signing, /rules/signing/new, /rules/signing/[id], /api/rules/signing, /api/rules/signing/[id] all registered.
+- 2026-04-14 — **Phase 1 Manual criteria complete on nancy.** Walkthrough covered baseline render, canonical + cross-domain add, edit-with-new-id, deep-link, reorder (file reflects byte-for-byte), hand-edit comment preservation across add/delete, 409 duplicate guard, 400 validation, 3-tier help (About/[?]/tooltip), back-compat via `/domains` Add Domain / Delete Domain, and the behavioural single-instance check (`docker compose up --scale dkim-dashboard=2` produced the documented `container_name` refusal). Optional sections 15 (atomicity chmod variant) are skipped. Phase 1 is signed off.
 
 ## Decisions & Notes
 
