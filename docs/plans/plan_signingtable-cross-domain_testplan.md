@@ -192,27 +192,25 @@ Then delete that domain from `/domains`:
 - [x] Its signing rule disappears from `/rules/signing`.
 - [x] The `# TODO: review…` comment still survives.
 
-## 14. Single-instance invariant (Docker required — optional locally)
+## 14. Single-instance invariant (Docker required)
 
-The invariant the plan wants proven is: the compose file has a fixed `container_name`, so Docker refuses to run a second instance. The `docker compose up --scale` flag varies across compose versions, so the test plan gives three equivalent checks — any one passing is sufficient.
+The invariant the plan wants proven is **behavioural**: Docker refuses to run a second instance because of the `container_name` directive. Reading the config file only proves the intent is present — it does not prove the daemon honours it. The real test asks Docker to scale and observes the refusal.
 
-**Option A — inspect the resolved config (no daemon needed):**
-
-```bash
-docker compose config | grep container_name
-```
-
-- [ ] Output contains `container_name: dkim-dashboard`.
-
-**Option A′ — grep the file directly (works even without Docker installed):**
+**Primary test — observe the refusal:**
 
 ```bash
-grep -n container_name docker-compose.yml
+docker compose up --scale dkim-dashboard=2 -d
+# → WARNING: The "dkim-dashboard" service is using the custom container name
+#            "dkim-dashboard". Docker requires each container to have a unique
+#            name. Remove the custom name to scale the service
+docker compose down
 ```
 
-- [ ] Line 8 (or similar) shows `container_name: dkim-dashboard`, with a comment above it naming the single-instance invariant.
+- [ ] Compose emits the warning naming `container_name` and refuses to start the second container.
+- [ ] No second container was created (`docker ps -a` lists at most one `dkim-dashboard`).
+- [ ] `docker compose down` tears everything back down cleanly.
 
-**Option B — trigger the conflict directly:**
+**Equivalent alternative — same refusal via a different route:**
 
 ```bash
 docker compose up -d
@@ -221,20 +219,15 @@ docker run --name dkim-dashboard --rm alpine true
 docker compose down
 ```
 
-- [ ] The second `docker run` fails with a name-conflict error.
+- [ ] The `docker run` with the duplicated name fails with a conflict error.
 
-**Option C — compose scale subcommand:**
+**Fallback only if Docker is unavailable on this box (does NOT test behaviour, only config presence):**
 
 ```bash
-docker compose up -d
-docker compose scale dkim-dashboard=2
-# → Same conflict error
-docker compose down
+grep -n container_name docker-compose.yml
 ```
 
-- [ ] `docker compose scale` refuses with an error naming `container_name`.
-
-If Docker isn't set up on nancy, skip this section entirely. The CI-equivalent check is the `docker-compose.yml` diff — `container_name: dkim-dashboard` is present on the service.
+- [ ] File contains `container_name: dkim-dashboard`. Flag this section as "not verified behaviourally" — config-grep-only is a weaker-than-intended check, and the primary test should be re-run on a box with Docker.
 
 ## 15. Atomicity under crash (optional, filesystem-level)
 
