@@ -1,7 +1,7 @@
 ## Implementation: Cross-domain SigningTable entries in DKIM Dashboard
 
-**Status:** Phase 1 merged into `dev` (PR #4). Phase 2 in progress on `feature/keytable-thin`.
-**Branch:** `feature/keytable-thin` (current) — Phase 1 shipped via `feature/signingtable-cross-domain` (deleted)
+**Status:** Phase 1 merged into `dev` (PR #4). Phase 2 merged into `dev` (PR #5). Phase 3 in progress on `feature/trustedhosts-first-class`.
+**Branch:** `feature/trustedhosts-first-class` (current). Prior branches merged + deleted: `feature/signingtable-cross-domain`, `feature/keytable-thin`.
 **Plan:** [plan_signingtable-cross-domain.md](plan_signingtable-cross-domain.md)
 **Test plans (local, no live server):**
 - Phase 1: [plan_signingtable-cross-domain_testplan.md](plan_signingtable-cross-domain_testplan.md)
@@ -34,7 +34,22 @@
   - [x] **Extra B:** narrow Delete Domain — `DomainEntry.id`, `removeDomain(…, ruleId?)`, `/api/domains` DELETE accepts `ruleId`, `/domains` UI passes it, confirmation copy rewritten ("Remove signing rule", explains key retention + no-auto-delete of key files).
   - [x] Automated success criteria — `make ci` passes: 76 tests across 8 files, tsc clean, eslint clean, next build succeeds with new routes registered and `/api/keys` gone.
   - [ ] Manual success criteria — see [Phase 2 testplan](plan_signingtable-cross-domain_testplan_phase2.md)
-- [ ] Phase 3: TrustedHosts first-class — re-review after Phase 2
+- [ ] Phase 3: TrustedHosts first-class — **in progress**, re-reviewed 2026-04-14, scope agreed plan-verbatim with one deviation
+  - [ ] `lib/trusted-hosts.ts` + fixtures + tests (mirrors signing-table's shape minus reorder; inline-comment handling is the novel piece)
+  - [ ] `mutateTrustedHosts` atomic read-modify-write helper
+  - [ ] `lib/opendkim.ts` — `saveTrustedHosts` replaced by the new writer; legacy export removed (no external callers)
+  - [ ] Rewrite `app/api/trusted-hosts/route.ts` — `GET` (list) + `POST` (add). Bulk `PUT` dirty-flag save removed.
+  - [ ] New `app/api/trusted-hosts/[id]/route.ts` — `GET` / `PUT` / `DELETE`
+  - [ ] Rewrite `app/trusted-hosts/page.tsx` — per-row Edit / Delete, Add button links to `/trusted-hosts/new`
+  - [ ] New `app/trusted-hosts/new/page.tsx` and `app/trusted-hosts/[id]/page.tsx` (deep-linkable)
+  - [ ] Help — `TrustedHostsPageHelp` + `TrustedHostsAtoms` (IpHelp, CidrHelp, HostnameHelp, InlineCommentHelp). `RefileDirectiveHelp` re-exported from `SigningRulesAtoms` per plan's DRY note.
+  - [ ] **Plan deviation — inline comments survive edit.** The plan's explicit stance is "serialization for edited entries drops the inline comment (simpler canonical form)". Overridden: comments can carry important operator context and must stay through updates. The canonical emit for edited entries becomes `${value} ${inlineComment}` when one exists.
+  - [ ] Automated success criteria (`make ci`)
+  - [ ] Manual success criteria (local walkthrough on lucy)
+- [ ] Phase 4 (future, pre-plan mode) — scope larger than a single vertical slice; enters `/preplan` when we start it
+  - KeyTable R/W editor — individual key-entry add/edit/delete UI. Deferred from Phase 2 per plan's own explicit gate.
+  - DKIM debugging UI for onboarding fresh + elsewhere-hosted domains. Scope TBD; likely touches DNS lookup ergonomics, live signature verification, key-vs-record diff views.
+  - Start with `/preplan` to shape goal + scope before writing an implementation plan.
 
 ## Progress Log
 
@@ -60,6 +75,8 @@
 - Project uses **pnpm** (active lockfile). Shell aliases `npm` → `pnpm`. Makefile uses `npx` which resolves against either. No decision taken on removing the stale `package-lock.json`; left in place since it is unmaintained but not causing harm.
 - **Plan divergence — ParsedSigningTable wrapper.** The plan's stated `parseSigningTable(content): SigningTableLine[]` signature cannot encode EOL + trailing-newline metadata without either side-channel state or synthetic list entries. The module instead exports `ParsedSigningTable { lines, eol, hasFinalNewline }`. CRUD functions still operate on `SigningTableLine[]` per the plan; only parse / serialize / saveSigningTable deal with the wrapper. API signatures downstream are unaffected.
 - **Phase 2 scope creep (accepted):** `/domains` page will gain the 3-tier help surface alongside the KeyTable work, so the dashboard's help language is consistent across Domains / Signing Rules / Keys after Phase 2 lands. Surfaced during Phase 1 local testing.
+- **Phase 3 inline-comment deviation from plan (2026-04-14).** The plan said inline trailing comments should be dropped when an entry is edited, in favour of a simpler canonical form. Overridden at re-review: inline comments can carry important operator context and must survive edits. The edited-entry canonical form becomes `${value} ${inlineComment}\n` whenever an inline comment is present. `InlineCommentHelp` copy will reflect the preserve-on-edit behaviour rather than warning about drop-on-edit.
+- **Phase 4 reserved for pre-plan (2026-04-14).** KeyTable R/W editor + DKIM debugging UI (fresh / elsewhere-hosted domain onboarding) are bundled into a future Phase 4. Scope is too wide to plan directly — must enter `/preplan` to shape goal + scope first.
 
 ## Blockers
 
