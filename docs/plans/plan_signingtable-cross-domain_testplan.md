@@ -204,6 +204,14 @@ docker compose config | grep container_name
 
 - [ ] Output contains `container_name: dkim-dashboard`.
 
+**Option A′ — grep the file directly (works even without Docker installed):**
+
+```bash
+grep -n container_name docker-compose.yml
+```
+
+- [ ] Line 8 (or similar) shows `container_name: dkim-dashboard`, with a comment above it naming the single-instance invariant.
+
 **Option B — trigger the conflict directly:**
 
 ```bash
