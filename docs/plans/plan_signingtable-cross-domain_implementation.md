@@ -11,12 +11,12 @@
   - [x] Atomic-fs + write-lock + errors (libs + tests)
   - [x] signing-table parser/writer + fixtures + tests
   - [x] Refactor lib/opendkim.ts addDomain/removeDomain onto new writer
-  - [ ] API routes /api/rules/signing + /api/rules/signing/[id] + tests
-  - [ ] UI routes /rules/signing, /rules/signing/new, /rules/signing/[id]
-  - [ ] Help surface (HelpModal, AboutThisPage, RowHelp, FieldTooltip + content)
-  - [ ] Navbar + /domains back-link
-  - [ ] Automated success criteria (make ci)
-  - [ ] Manual success criteria (user-verified)
+  - [x] API routes /api/rules/signing + /api/rules/signing/[id] + tests
+  - [x] UI routes /rules/signing, /rules/signing/new, /rules/signing/[id]
+  - [x] Help surface (HelpModal, AboutThisPage, RowHelp, FieldTooltip + content)
+  - [x] Navbar + /domains back-link
+  - [x] Automated success criteria (`make test` 52 green, `make typecheck` clean, `make lint` clean, `make build` succeeds with all new routes registered)
+  - [ ] Manual success criteria (**awaiting user verification on ursa**)
 - [ ] Phase 2: KeyTable thin (read-only UI, round-trip writer) — re-review after Phase 1
 - [ ] Phase 3: TrustedHosts first-class — re-review after Phase 2
 
@@ -27,6 +27,11 @@
 - 2026-04-14 — Atomic-fs, write-lock, and typed errors landed (7d7580b). 10 tests pass: atomic writes/overwrites/mode, tmp cleanup on rename failure, target untouched on write failure, lock serialisation on same path, concurrency across paths, rejection isolation, FIFO ordering.
 - 2026-04-14 — SigningTable parser/writer/CRUD landed (a794cc5). 22 tests pass: round-trip identity for 9 fixtures, duplicate-id disambiguation, malformed-rule handling, CRUD preserves untouched lines, reorder carries leading blocks and keeps trailing at end, DuplicateEntryError/NotFoundError thrown per plan.
 - 2026-04-14 — lib/opendkim.ts getDomains/addDomain/removeDomain now route SigningTable through the new writer (04e4b25). User-visible behaviour of Add Domain / Delete Domain unchanged; internal effect is round-trip safety (hand-edits survive).
+- 2026-04-14 — mutateSigningTable atomic RMW helper added (434e3c0); opendkim.ts callers rewired to use it so the read-and-write both run under the per-path lock.
+- 2026-04-14 — API handlers landed (266d732): GET/POST/PATCH on /api/rules/signing, GET/PUT/DELETE on /api/rules/signing/[id], plus lib/api-errors.ts helper. 20 handler-level tests exercise happy paths and the full 400/404/409 matrix.
+- 2026-04-14 — Help surface (57ce325): HelpModal, AboutThisPage, RowHelp, FieldTooltip + level-3 SigningRulesPageHelp and level-2 SigningRulesAtoms.
+- 2026-04-14 — Signing Rules UI pages (28bdd27): list with reorder/delete, new-rule form, edit/delete [id] page. Navbar link + Domains back-link (0033a54).
+- 2026-04-14 — **Phase 1 Automated Success Criteria all green.** 52 vitest tests, tsc --noEmit clean, eslint clean, next build succeeds with /rules/signing, /rules/signing/new, /rules/signing/[id], /api/rules/signing, /api/rules/signing/[id] all registered.
 
 ## Decisions & Notes
 
@@ -50,3 +55,9 @@ _None._
 - `7d7580b` — feat: add atomic-fs, write-lock, and typed errors
 - `a794cc5` — feat: add round-trip-safe SigningTable parser, writer, and CRUD
 - `04e4b25` — refactor: route addDomain/removeDomain SigningTable writes through round-trip-safe writer
+- `560e940` — docs: tracker — parser/writer, refactor, and 32 tests landed
+- `434e3c0` — feat: add atomic read-modify-write helper for SigningTable
+- `266d732` — feat: add /api/rules/signing and /api/rules/signing/[id] handlers
+- `57ce325` — feat: add 3-tier help components and SigningRules content
+- `28bdd27` — feat: add signing rules UI — list, add, edit/delete routes
+- `0033a54` — feat: wire Signing Rules into Navbar and add Domains back-link
