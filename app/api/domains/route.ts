@@ -31,11 +31,14 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const { domain, selector } = await req.json();
+    const { domain, selector, ruleId } = await req.json();
     if (!domain || !selector) {
       return NextResponse.json({ error: 'domain and selector are required' }, { status: 400 });
     }
-    await removeDomain(domain, selector);
+    if (ruleId !== undefined && typeof ruleId !== 'string') {
+      return NextResponse.json({ error: 'ruleId, if provided, must be a string' }, { status: 400 });
+    }
+    await removeDomain(domain, selector, ruleId);
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });

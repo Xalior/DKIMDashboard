@@ -1,9 +1,11 @@
 ## Implementation: Cross-domain SigningTable entries in DKIM Dashboard
 
-**Status:** Phase 1 Complete — Phase 2 Re-review Pending
-**Branch:** `feature/signingtable-cross-domain`
+**Status:** Phase 1 merged into `dev` (PR #4). Phase 2 in progress on `feature/keytable-thin`.
+**Branch:** `feature/keytable-thin` (current) — Phase 1 shipped via `feature/signingtable-cross-domain` (deleted)
 **Plan:** [plan_signingtable-cross-domain.md](plan_signingtable-cross-domain.md)
-**Test plan (local, no live server):** [plan_signingtable-cross-domain_testplan.md](plan_signingtable-cross-domain_testplan.md)
+**Test plans (local, no live server):**
+- Phase 1: [plan_signingtable-cross-domain_testplan.md](plan_signingtable-cross-domain_testplan.md)
+- Phase 2: [plan_signingtable-cross-domain_testplan_phase2.md](plan_signingtable-cross-domain_testplan_phase2.md)
 
 ## Tasks
 
@@ -18,8 +20,20 @@
   - [x] Navbar + /domains back-link
   - [x] Automated success criteria (`make test` 52 green, `make typecheck` clean, `make lint` clean, `make build` succeeds with all new routes registered)
   - [x] Manual success criteria — all non-optional sections signed off on nancy via [testplan](plan_signingtable-cross-domain_testplan.md). Live-server criteria from the plan (real mail + DNS + `dkim=pass` verification, mid-write container kill) remain deferred as agreed — alpha is not being tested on a production host.
-- [ ] Phase 2: KeyTable thin (read-only UI, round-trip writer) — re-review after Phase 1
-  - [ ] **Followup (fold into Phase 2 scope):** retro-fit the 3-tier help surface onto `/domains` for consistency with `/rules/signing`. Less confusing page, so lower urgency, but the visual inconsistency is noticeable once the signing-rules pages ship. Reuses the existing `HelpModal` / `AboutThisPage` / `RowHelp` / `FieldTooltip` components; needs new content atoms only (e.g. `DomainsPageHelp`, `FromPatternHelp`, `SelectorHelp`).
+- [ ] Phase 2: KeyTable thin — code complete on `feature/keytable-thin`, awaiting local manual verification
+  - [x] `lib/key-table.ts` + fixtures + tests (mirrors signing-table's shape, including the `ParsedKeyTable` wrapper for EOL / trailing-newline preservation)
+  - [x] `mutateKeyTable` atomic read-modify-write helper (matches `mutateSigningTable` from Phase 1)
+  - [x] Refactor `lib/opendkim.ts` addDomain / removeDomain KeyTable paths through the new writer
+  - [x] `GET /api/rules/keys` and `GET /api/rules/keys/[id]` (read-only — R/W editor deferred per plan)
+  - [x] Rewrite `app/keys/page.tsx` against the new endpoint, with "non-standard entry" badges for malformed rows
+  - [x] New `app/rules/keys/[id]/page.tsx` read-only detail (disk files + expected DNS + live DNS verification for canonical; raw-line + explanation for malformed)
+  - [x] Remove `app/api/keys/route.ts`
+  - [x] Navbar: active state covers `/rules/keys/[id]` under the Keys link
+  - [x] Help content — `KeyEntriesPageHelp` + `KeyEntriesAtoms`
+  - [x] **Extra A:** `/domains` 3-tier help retrofit — `DomainsPageHelp` + `DomainsAtoms` (DomainFieldHelp, FromPatternHelp, SelectorFieldHelp, DnsStatusHelp). Column headers + Add-Domain form fields now carry `[?]` + tooltip.
+  - [x] **Extra B:** narrow Delete Domain — `DomainEntry.id`, `removeDomain(…, ruleId?)`, `/api/domains` DELETE accepts `ruleId`, `/domains` UI passes it, confirmation copy rewritten ("Remove signing rule", explains key retention + no-auto-delete of key files).
+  - [x] Automated success criteria — `make ci` passes: 76 tests across 8 files, tsc clean, eslint clean, next build succeeds with new routes registered and `/api/keys` gone.
+  - [ ] Manual success criteria — see [Phase 2 testplan](plan_signingtable-cross-domain_testplan_phase2.md)
 - [ ] Phase 3: TrustedHosts first-class — re-review after Phase 2
 
 ## Progress Log
@@ -35,6 +49,9 @@
 - 2026-04-14 — Signing Rules UI pages (28bdd27): list with reorder/delete, new-rule form, edit/delete [id] page. Navbar link + Domains back-link (0033a54).
 - 2026-04-14 — **Phase 1 Automated Success Criteria all green.** 52 vitest tests, tsc --noEmit clean, eslint clean, next build succeeds with /rules/signing, /rules/signing/new, /rules/signing/[id], /api/rules/signing, /api/rules/signing/[id] all registered.
 - 2026-04-14 — **Phase 1 Manual criteria complete on nancy.** Walkthrough covered baseline render, canonical + cross-domain add, edit-with-new-id, deep-link, reorder (file reflects byte-for-byte), hand-edit comment preservation across add/delete, 409 duplicate guard, 400 validation, 3-tier help (About/[?]/tooltip), back-compat via `/domains` Add Domain / Delete Domain, and the behavioural single-instance check (`docker compose up --scale dkim-dashboard=2` produced the documented `container_name` refusal). Optional sections 15 (atomicity chmod variant) are skipped. Phase 1 is signed off.
+- 2026-04-14 — **PR #4 merged to dev.** Phase 1 branch deleted. Phase 2 branched off fresh dev as `feature/keytable-thin`.
+- 2026-04-14 — **Phase 2 re-review complete.** Scope agreed: plan verbatim + two extras (Domains help retrofit + narrow Delete Domain) in a single batch / single PR.
+- 2026-04-14 — **Phase 2 code complete** on `feature/keytable-thin`. Commits: key-table lib + 18 tests (1cd52c3), opendkim refactor w/ narrow-delete (bf6f79e), keys API read-only (f4428d1), /keys rewrite + detail page (2c19eca), /domains retrofit + narrow-delete wiring (5ddb219). `make ci` green: 76 tests, clean tsc + eslint, build succeeds. Awaiting manual walkthrough on nancy before PR.
 
 ## Decisions & Notes
 

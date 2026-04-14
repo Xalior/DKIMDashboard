@@ -1,0 +1,5 @@
+# KeyTable — maps selectorDomain to domain:selector:keyPath
+# Managed by DKIM Dashboard
+
+mail._domainkey.nextbestnetwork.com nextbestnetwork.com:mail:/etc/opendkim/keys/nextbestnetwork.com/mail.private
+mail._domainkey.example.com example.com:mail:/etc/opendkim/keys/example.com/mail.private
