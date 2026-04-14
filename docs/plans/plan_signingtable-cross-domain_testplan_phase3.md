@@ -21,10 +21,10 @@ make ci     # lint → typecheck → test → build
 ```
 
 Expected:
-- [ ] `make lint` — no output
-- [ ] `make typecheck` — no output
-- [ ] `make test` — **111 passed** across 11 files (adds 19 trusted-hosts + 16 trusted-hosts API handler tests on top of Phase 2's 76)
-- [ ] `make build` — succeeds; route list includes `/api/trusted-hosts/[id]`, `/trusted-hosts/[id]`, `/trusted-hosts/new`
+- [x] `make lint` — no output
+- [x] `make typecheck` — no output
+- [x] `make test` — **111 passed** across 11 files (adds 19 trusted-hosts + 16 trusted-hosts API handler tests on top of Phase 2's 76)
+- [x] `make build` — succeeds; route list includes `/api/trusted-hosts/[id]`, `/trusted-hosts/[id]`, `/trusted-hosts/new`
 
 ## 2. Start the dev server
 
@@ -43,19 +43,19 @@ watch -n 0.5 'cat data/opendkim/TrustedHosts'
 Click **Trusted Hosts** in the navbar.
 
 Checks:
-- [ ] Page header has: title, "About this page", Refresh, **Add Trusted Host** (primary).
-- [ ] Table columns: `Value`, `Inline comment`, `Actions`. Each header has a `[?]` level-2 help button.
-- [ ] The Value column's `[?]` opens a combined modal stacking IP / CIDR / Hostname / refile: help.
-- [ ] The seed row `0.0.0.0/0` is listed with an em-dash in the inline-comment column.
-- [ ] Each row has Edit (pencil) and Delete (trash) buttons.
-- [ ] The old "Save Changes" dirty-flag button is gone entirely.
+- [x] Page header has: title, "About this page", Refresh, **Add Trusted Host** (primary).
+- [x] Table columns: `Value`, `Inline comment`, `Actions`. Each header has a `[?]` level-2 help button.
+- [x] The Value column's `[?]` opens a combined modal stacking IP / CIDR / Hostname / refile: help.
+- [x] The seed row `0.0.0.0/0` is listed with an em-dash in the inline-comment column.
+- [x] Each row has Edit (pencil) and Delete (trash) buttons.
+- [x] The old "Save Changes" dirty-flag button is gone entirely.
 
 ## 4. About this page modal
 
 Click **About this page**.
 
 Checks:
-- [ ] Level-3 copy covers: entry kinds, OpenDKIM's dual-role usage, order-doesn't-matter, inline-comment preservation on edit, hand-edit survival.
+- [x] Level-3 copy covers: entry kinds, OpenDKIM's dual-role usage, order-doesn't-matter, inline-comment preservation on edit, hand-edit survival.
 
 ## 5. Add a plain entry
 
@@ -68,10 +68,10 @@ Fill:
 Submit.
 
 Checks:
-- [ ] Redirected to `/trusted-hosts`.
-- [ ] New row appears at the bottom (`10.0.0.0/8`), no inline-comment.
-- [ ] `data/opendkim/TrustedHosts` now has the new line.
-- [ ] Original `0.0.0.0/0` line is unchanged byte-for-byte.
+- [x] Redirected to `/trusted-hosts`.
+- [x] New row appears at the bottom (`10.0.0.0/8`), no inline-comment.
+- [x] `data/opendkim/TrustedHosts` now has the new line.
+- [x] Original `0.0.0.0/0` line is unchanged byte-for-byte.
 
 ## 6. Add an entry with an inline comment
 
@@ -83,9 +83,9 @@ Fill:
 Submit.
 
 Checks:
-- [ ] Redirect back. New row shows `127.0.0.1` + `# loopback` in the inline-comment column.
-- [ ] On disk: the line is `127.0.0.1 # loopback` (leading `#` was added for you).
-- [ ] The form's inline-comment behaviour is documented in the field help text.
+- [#] Redirect back. New row shows `127.0.0.1` + `# loopback` in the inline-comment column.
+- [#] On disk: the line is `127.0.0.1 # loopback` (leading `#` was added for you).
+- [#] The form's inline-comment behaviour is documented in the field help text.
 
 ## 7. Deep-link to edit + edit value only (inline comment preserved)
 
@@ -94,36 +94,36 @@ Click the pencil on the `127.0.0.1` row. URL shape: `/trusted-hosts/<id>`. Copy 
 Change Value to `::1`, leave inline comment as-is (`# loopback`). Save.
 
 Checks:
-- [ ] Redirected to list.
-- [ ] Row now shows `::1` with `# loopback` preserved.
-- [ ] On disk: `::1 # loopback`.
-- [ ] Paste the copied URL into a fresh private window → lands on a **"Trusted host not found"** page (id changed on save — plan-verbatim honest-URL behaviour).
-- [ ] Click the "Back to Trusted Hosts" button on the not-found page. Works.
+- [#] Redirected to list.
+- [#] Row now shows `::1` with `# loopback` preserved.
+- [#] On disk: `::1 # loopback`.
+- [#] Paste the copied URL into a fresh private window → lands on a **"Trusted host not found"** page (id changed on save — plan-verbatim honest-URL behaviour).
+- [#] Click the "Back to Trusted Hosts" button on the not-found page. Works.
 
 ## 8. Edit — drop the inline comment
 
 Click the pencil on the `::1` row. Clear the inline-comment field. Save.
 
 Checks:
-- [ ] On disk: line is now `::1` (no trailing comment).
-- [ ] Other entries byte-for-byte unchanged.
+- [#] On disk: line is now `::1` (no trailing comment).
+- [#] Other entries byte-for-byte unchanged.
 
 ## 9. Edit — replace the inline comment
 
 Click the pencil on the `::1` row. Set Value to `::1`, inline comment to `ipv6 localhost`. Save.
 
 Checks:
-- [ ] On disk: `::1 # ipv6 localhost` (leading `#` added).
-- [ ] The row in the list reflects the new comment.
+- [#] On disk: `::1 # ipv6 localhost` (leading `#` added).
+- [#] The row in the list reflects the new comment.
 
 ## 10. Refile: directive
 
 Click **Add Trusted Host**. Value: `refile:/etc/opendkim/IgnoreHosts`. No inline comment. Submit.
 
 Checks:
-- [ ] Row renders with a blue `refile` badge.
-- [ ] On disk: line preserved byte-for-byte.
-- [ ] Deep-link to that row's edit page → the `refile` badge appears next to the "Edit trusted host" heading.
+- [#] Row renders with a blue `refile` badge.
+- [#] On disk: line preserved byte-for-byte.
+- [#] Deep-link to that row's edit page → the `refile` badge appears next to the "Edit trusted host" heading.
 
 ## 11. Hand-edit preservation across CRUD
 
@@ -140,8 +140,8 @@ cat data/opendkim/TrustedHosts
 In the UI, Refresh.
 
 Checks:
-- [ ] Comment is **not** rendered as a row (it's attached as leading to the entry below).
-- [ ] Subsequent rows render correctly.
+- [x] Comment is **not** rendered as a row (it's attached as leading to the entry below).
+- [x] Subsequent rows render correctly.
 
 Now add a new entry via the UI (e.g. `192.168.1.0/24`).
 
@@ -152,40 +152,40 @@ Checks:
 Delete a different entry via the UI.
 
 Checks:
-- [ ] Hand-added top comment is **still present**.
-- [ ] Entries the hand-added comment wasn't attached to are unaffected.
+- [x] Hand-added top comment is **still present**.
+- [x] Entries the hand-added comment wasn't attached to are unaffected.
 
 ## 12. Duplicate guard (409)
 
 Click **Add Trusted Host**, Value: `0.0.0.0/0` (or whatever's already on line 1). Submit.
 
 Checks:
-- [ ] The form does not redirect. Red dismissible Alert appears with a `Duplicate trusted-host…` message.
-- [ ] On disk: no new line was added.
+- [x] The form does not redirect. Red dismissible Alert appears with a `Duplicate trusted-host…` message.
+- [x] On disk: no new line was added.
 
 ## 13. Validation (400)
 
 On the Add page, submit with Value empty.
 
 Checks:
-- [ ] HTML5 validation blocks submission (the Add button is disabled when Value is empty).
-- [ ] In DevTools → Network, `fetch('/api/trusted-hosts', { method: 'POST', body: JSON.stringify({}) })` returns **400** with `{ error: 'VALIDATION_ERROR', message: '...' }`.
+- [x] HTML5 validation blocks submission (the Add button is disabled when Value is empty).
+- [x] In DevTools → Network, `fetch('/api/trusted-hosts', { method: 'POST', body: JSON.stringify({}) })` returns **400** with `{ error: 'VALIDATION_ERROR', message: '...' }`.
 
 ## 14. Delete + leading-block removal
 
 Delete the `192.168.1.0/24` row you added in step 11.
 
 Checks:
-- [ ] Row gone from the list.
-- [ ] If this row had a preceding comment, the comment goes with it (leading-block removal).
-- [ ] Other entries byte-for-byte unchanged.
+- [x] Row gone from the list.
+- [x] If this row had a preceding comment, the comment goes with it (leading-block removal).
+- [x] Other entries byte-for-byte unchanged.
 
 ## 15. Keyboard / a11y spot check
 
 On `/trusted-hosts/new`:
-- [ ] Tab cycles: Value → Inline comment → Add button. Focus rings visible.
-- [ ] Tooltips announce on focus (`aria-describedby` wired).
-- [ ] Enter on a `[?]` opens the modal; Esc closes it.
+- [x] Tab cycles: Value → Inline comment → Add button. Focus rings visible.
+- [x] Tooltips announce on focus (`aria-describedby` wired).
+- [x] Enter on a `[?]` opens the modal; Esc closes it.
 
 ## 16. Teardown
 
