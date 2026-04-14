@@ -72,6 +72,11 @@
       - **`aria-describedby` wiring on form inputs.** Every `FieldTooltip`-wrapped input has the right `aria-describedby` attribute pointing at a visible tooltip ID. Component-level test with jsdom is sufficient.
       - **Malformed-KeyTable surfacing (Phase 2).** A KeyTable line with `selectorDomain ` followed by a malformed value side must show as a "non-standard entry" row, no Regenerate button, and its `/rules/keys/[id]` detail page shows only the raw-line card. Handler tests exist; UI render tests do not.
       - **Add-Domain regenerates-on-collision (pre-existing dashboard behaviour).** Adding a domain with an existing `(domain, selector)` silently regenerates the private key and clobbers the `.txt` file — flagged as a pre-existing bug during Phase 2 testing and explicitly out-of-scope for that phase. Phase 4 should decide whether to fix this (confirmation prompt before overwrite) and add a regression test either way.
+      - **Leading block mixing comments + blanks is invisible in the UI.** Flagged during Phase 3 walkthrough: a file like `# note\n\n0.0.0.0/0\n` parses correctly and round-trips byte-for-byte, but neither the comment nor the blank line shows in the UI — the only visible artefact is the entry, and its prose-comment context is effectively hidden until Phase 4's comment-visibility work lands. Regression tests once that work ships:
+        - A leading block of comment + blank + comment still round-trips byte-for-byte through every CRUD path.
+        - All three of comment / blank / "disabled entry" are rendered distinguishably in the UI.
+        - Deleting the owning entry surfaces the leading block in the delete-preview modal (so operators see what's going with the entry, rather than only discovering its loss by reading the file afterwards).
+        - Adding a new entry between an owner-plus-leading-block and a later entry doesn't accidentally re-attach the leading block to the new entry — ownership stays with the original.
   - Start with `/preplan` to shape goal + scope before writing an implementation plan.
 
 ## Progress Log
