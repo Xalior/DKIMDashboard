@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import {
   Container, Card, Table, Button, Modal, Form, Alert, Spinner, Badge, Row, Col,
 } from 'react-bootstrap';
@@ -144,7 +145,12 @@ export default function DomainsPage() {
   return (
     <Container className="py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2><i className="bi bi-globe me-2"></i>Domains</h2>
+        <div>
+          <h2 className="mb-1"><i className="bi bi-globe me-2"></i>Domains</h2>
+          <Link href="/rules/signing" className="text-muted small">
+            View all signing rules <i className="bi bi-arrow-right ms-1"></i>
+          </Link>
+        </div>
         <div>
           <Button variant="outline-secondary" className="me-2" onClick={fetchDomains}>
             <i className="bi bi-arrow-clockwise me-1"></i>Refresh All
