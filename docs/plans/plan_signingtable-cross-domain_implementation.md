@@ -49,6 +49,7 @@
 - [ ] Phase 4 (future, pre-plan mode) — scope larger than a single vertical slice; enters `/preplan` when we start it
   - KeyTable R/W editor — individual key-entry add/edit/delete UI. Deferred from Phase 2 per plan's own explicit gate.
   - DKIM debugging UI for onboarding fresh + elsewhere-hosted domains. Scope TBD; likely touches DNS lookup ergonomics, live signature verification, key-vs-record diff views.
+  - **Full test-suite rollout** — the three phases of this plan have covered lib + API handler tests via vitest. The UI layer (pages, forms, modals, help surface wiring) currently has no automated coverage; Phase 4 should fold in a browser / component test layer (e.g. Playwright or @testing-library/react) alongside the feature work so the UI stops being a manual-only check.
   - Start with `/preplan` to shape goal + scope before writing an implementation plan.
 
 ## Progress Log
