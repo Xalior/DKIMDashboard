@@ -2,7 +2,7 @@
 
 **Status:** In Progress
 **Branch:** `feature/signingtable-cross-domain`
-**Plan:** [docs/plans/plan_signingtable-cross-domain.md](plans/plan_signingtable-cross-domain.md)
+**Plan:** [plan_signingtable-cross-domain.md](plan_signingtable-cross-domain.md)
 
 ## Tasks
 
