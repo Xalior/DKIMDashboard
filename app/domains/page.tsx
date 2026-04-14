@@ -6,6 +6,17 @@ import {
   Container, Card, Table, Button, Modal, Form, Alert, Spinner, Badge, Row, Col,
 } from 'react-bootstrap';
 
+import AboutThisPage from '@/components/AboutThisPage';
+import FieldTooltip from '@/components/FieldTooltip';
+import RowHelp from '@/components/RowHelp';
+import DomainsPageHelp from '@/components/help/DomainsPageHelp';
+import {
+  DnsStatusHelp,
+  DomainFieldHelp,
+  FromPatternHelp,
+  SelectorFieldHelp,
+} from '@/components/help/DomainsAtoms';
+
 interface DnsExpected {
   recordName: string;
   recordType: string;
@@ -23,6 +34,7 @@ interface DnsVerification {
 }
 
 interface DomainInfo {
+  id: string;
   pattern: string;
   selectorDomain: string;
   domain: string;
@@ -121,7 +133,11 @@ export default function DomainsPage() {
       const res = await fetch('/api/domains', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: showDelete.domain, selector: showDelete.selector }),
+        body: JSON.stringify({
+          domain: showDelete.domain,
+          selector: showDelete.selector,
+          ruleId: showDelete.id,
+        }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -151,8 +167,11 @@ export default function DomainsPage() {
             View all signing rules <i className="bi bi-arrow-right ms-1"></i>
           </Link>
         </div>
-        <div>
-          <Button variant="outline-secondary" className="me-2" onClick={fetchDomains}>
+        <div className="d-flex gap-2 align-items-center">
+          <AboutThisPage title="About the Domains page">
+            <DomainsPageHelp />
+          </AboutThisPage>
+          <Button variant="outline-secondary" onClick={fetchDomains}>
             <i className="bi bi-arrow-clockwise me-1"></i>Refresh All
           </Button>
           <Button variant="primary" onClick={() => { setShowAdd(true); setAddResult(null); setNewDomain(''); setNewSelector('mail'); }}>
@@ -172,10 +191,30 @@ export default function DomainsPage() {
           <Table hover responsive className="mb-0">
             <thead className="table-light">
               <tr>
-                <th>Domain</th>
-                <th>From Pattern</th>
-                <th>Selector</th>
-                <th>DNS Status</th>
+                <th>
+                  Domain
+                  <RowHelp title="Domain">
+                    <DomainFieldHelp />
+                  </RowHelp>
+                </th>
+                <th>
+                  From Pattern
+                  <RowHelp title="From pattern">
+                    <FromPatternHelp />
+                  </RowHelp>
+                </th>
+                <th>
+                  Selector
+                  <RowHelp title="Selector">
+                    <SelectorFieldHelp />
+                  </RowHelp>
+                </th>
+                <th>
+                  DNS Status
+                  <RowHelp title="DNS status">
+                    <DnsStatusHelp />
+                  </RowHelp>
+                </th>
                 <th className="text-end">Actions</th>
               </tr>
             </thead>
@@ -257,37 +296,73 @@ export default function DomainsPage() {
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Domain</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="example.com"
-                      value={newDomain}
-                      onChange={e => setNewDomain(e.target.value)}
-                    />
+                    <Form.Label htmlFor="add-domain-domain">
+                      Domain
+                      <RowHelp title="Domain">
+                        <DomainFieldHelp />
+                      </RowHelp>
+                    </Form.Label>
+                    <FieldTooltip
+                      id="add-domain-domain-tooltip"
+                      content="The mail domain to sign (controls d=, on-disk layout, and DNS record name)"
+                    >
+                      <Form.Control
+                        id="add-domain-domain"
+                        type="text"
+                        placeholder="example.com"
+                        value={newDomain}
+                        onChange={e => setNewDomain(e.target.value)}
+                        aria-describedby="add-domain-domain-tooltip"
+                      />
+                    </FieldTooltip>
                     <Form.Text className="text-muted">The domain to sign mail for</Form.Text>
                   </Form.Group>
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Selector</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="mail"
-                      value={newSelector}
-                      onChange={e => setNewSelector(e.target.value)}
-                    />
+                    <Form.Label htmlFor="add-domain-selector">
+                      Selector
+                      <RowHelp title="Selector">
+                        <SelectorFieldHelp />
+                      </RowHelp>
+                    </Form.Label>
+                    <FieldTooltip
+                      id="add-domain-selector-tooltip"
+                      content="Labels this key in DNS (selector._domainkey.domain) and in the s= tag. Usually 'mail'."
+                    >
+                      <Form.Control
+                        id="add-domain-selector"
+                        type="text"
+                        placeholder="mail"
+                        value={newSelector}
+                        onChange={e => setNewSelector(e.target.value)}
+                        aria-describedby="add-domain-selector-tooltip"
+                      />
+                    </FieldTooltip>
                     <Form.Text className="text-muted">DKIM selector (typically &quot;mail&quot;)</Form.Text>
                   </Form.Group>
                 </Col>
               </Row>
               <Form.Group className="mb-3">
-                <Form.Label>From Pattern</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="*@example.com"
-                  value={newFromPattern}
-                  onChange={e => setNewFromPattern(e.target.value)}
-                />
+                <Form.Label htmlFor="add-domain-from-pattern">
+                  From Pattern
+                  <RowHelp title="From pattern">
+                    <FromPatternHelp />
+                  </RowHelp>
+                </Form.Label>
+                <FieldTooltip
+                  id="add-domain-from-pattern-tooltip"
+                  content="Envelope-From address pattern. Supports * as wildcard."
+                >
+                  <Form.Control
+                    id="add-domain-from-pattern"
+                    type="text"
+                    placeholder="*@example.com"
+                    value={newFromPattern}
+                    onChange={e => setNewFromPattern(e.target.value)}
+                    aria-describedby="add-domain-from-pattern-tooltip"
+                  />
+                </FieldTooltip>
                 <Form.Text className="text-muted">
                   Pattern to match in the From header (e.g. *@example.com or *@id.example.com)
                 </Form.Text>
@@ -310,18 +385,24 @@ export default function DomainsPage() {
       {/* Delete Confirmation Modal */}
       <Modal show={!!showDelete} onHide={() => setShowDelete(null)}>
         <Modal.Header closeButton>
-          <Modal.Title><i className="bi bi-exclamation-triangle text-danger me-2"></i>Remove Domain</Modal.Title>
+          <Modal.Title><i className="bi bi-exclamation-triangle text-danger me-2"></i>Remove signing rule</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Are you sure you want to remove <strong>{showDelete?.domain}</strong>?</p>
-          <p className="text-muted mb-0">
-            This will remove the domain from SigningTable and KeyTable. Key files on disk will not be deleted.
+          <p>Remove this signing rule?</p>
+          <pre className="p-2 bg-light rounded border mb-3">
+            {showDelete?.pattern} {showDelete?.selectorDomain}
+          </pre>
+          <p className="text-muted small mb-0">
+            If no other rule still references <code>{showDelete?.selectorDomain}</code>, the
+            KeyTable entry will also be removed. Private key files on disk are never deleted
+            automatically — tidy up <code>keys/{showDelete?.domain}/</code> by hand if you want
+            the disk space back.
           </p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDelete(null)}>Cancel</Button>
           <Button variant="danger" onClick={handleDelete} disabled={deleting}>
-            {deleting ? <><Spinner size="sm" className="me-1" />Removing...</> : 'Remove Domain'}
+            {deleting ? <><Spinner size="sm" className="me-1" />Removing...</> : 'Remove rule'}
           </Button>
         </Modal.Footer>
       </Modal>
