@@ -1,69 +1,78 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
-  Container, Card, ListGroup, Button, Form, InputGroup, Alert, Spinner,
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Container,
+  Modal,
+  Spinner,
+  Table,
 } from 'react-bootstrap';
 
-interface TrustedHost {
+import AboutThisPage from '@/components/AboutThisPage';
+import RowHelp from '@/components/RowHelp';
+import TrustedHostsPageHelp from '@/components/help/TrustedHostsPageHelp';
+import {
+  CidrHelp,
+  HostnameHelp,
+  InlineCommentHelp,
+  IpHelp,
+  RefileDirectiveHelp,
+} from '@/components/help/TrustedHostsAtoms';
+
+interface TrustedHostEntry {
+  id: string;
   value: string;
+  isRefile: boolean;
+  inlineComment?: string;
 }
 
 export default function TrustedHostsPage() {
-  const [hosts, setHosts] = useState<string[]>([]);
+  const router = useRouter();
+  const [entries, setEntries] = useState<TrustedHostEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [newHost, setNewHost] = useState('');
-  const [dirty, setDirty] = useState(false);
+  const [showDelete, setShowDelete] = useState<TrustedHostEntry | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  const fetchHosts = () => {
+  const fetchEntries = useCallback(() => {
     setLoading(true);
     fetch('/api/trusted-hosts')
-      .then(r => r.json())
-      .then(data => {
-        if (data.error) throw new Error(data.error);
-        setHosts(data.map((h: TrustedHost) => h.value));
-        setDirty(false);
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return (await r.json()) as TrustedHostEntry[];
       })
-      .catch(err => setError(err.message))
+      .then(setEntries)
+      .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false));
-  };
+  }, []);
 
-  useEffect(() => { fetchHosts(); }, []);
+  useEffect(() => {
+    fetchEntries();
+  }, [fetchEntries]);
 
-  const addHost = () => {
-    const trimmed = newHost.trim();
-    if (!trimmed || hosts.includes(trimmed)) return;
-    setHosts([...hosts, trimmed]);
-    setNewHost('');
-    setDirty(true);
-  };
-
-  const removeHost = (index: number) => {
-    setHosts(hosts.filter((_, i) => i !== index));
-    setDirty(true);
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
+  const handleDelete = async () => {
+    if (!showDelete) return;
+    setDeleting(true);
     setError(null);
-    setSuccess(null);
     try {
-      const res = await fetch('/api/trusted-hosts', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hosts }),
+      const res = await fetch(`/api/trusted-hosts/${encodeURIComponent(showDelete.id)}`, {
+        method: 'DELETE',
       });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      setSuccess('Trusted hosts saved. Reload OpenDKIM for changes to take effect.');
-      setDirty(false);
+      if (!res.ok && res.status !== 204) {
+        const body = (await res.json().catch(() => ({}))) as { message?: string };
+        throw new Error(body.message ?? `HTTP ${res.status}`);
+      }
+      setShowDelete(null);
+      fetchEntries();
     } catch (err) {
-      setError(String(err));
+      setError((err as Error).message);
     } finally {
-      setSaving(false);
+      setDeleting(false);
     }
   };
 
@@ -78,61 +87,140 @@ export default function TrustedHostsPage() {
   return (
     <Container className="py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2><i className="bi bi-people me-2"></i>Trusted Hosts</h2>
-        {dirty && (
-          <Button variant="primary" onClick={handleSave} disabled={saving}>
-            {saving ? <><Spinner size="sm" className="me-1" />Saving...</> : <><i className="bi bi-save me-1"></i>Save Changes</>}
+        <h2 className="mb-0">
+          <i className="bi bi-people me-2"></i>Trusted Hosts
+        </h2>
+        <div className="d-flex gap-2 align-items-center">
+          <AboutThisPage title="About the Trusted Hosts page">
+            <TrustedHostsPageHelp />
+          </AboutThisPage>
+          <Button variant="outline-secondary" onClick={fetchEntries}>
+            <i className="bi bi-arrow-clockwise me-1"></i>Refresh
           </Button>
-        )}
+          <Button variant="primary" onClick={() => router.push('/trusted-hosts/new')}>
+            <i className="bi bi-plus-circle me-1"></i>Add Trusted Host
+          </Button>
+        </div>
       </div>
 
       {error && (
         <Alert variant="danger" dismissible onClose={() => setError(null)}>
-          <i className="bi bi-exclamation-triangle me-2"></i>{error}
-        </Alert>
-      )}
-      {success && (
-        <Alert variant="success" dismissible onClose={() => setSuccess(null)}>
-          <i className="bi bi-check-circle me-2"></i>{success}
+          <i className="bi bi-exclamation-triangle me-2"></i>
+          {error}
         </Alert>
       )}
 
       <Card>
-        <Card.Header>
-          <i className="bi bi-info-circle me-2"></i>
-          Hosts and networks listed here are trusted to send mail to be signed. Use IP addresses, CIDR ranges, or hostnames.
-        </Card.Header>
-        <Card.Body>
-          <InputGroup className="mb-3">
-            <Form.Control
-              type="text"
-              placeholder="e.g. 127.0.0.1, 10.0.0.0/8, or mail.example.com"
-              value={newHost}
-              onChange={e => setNewHost(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addHost())}
-            />
-            <Button variant="outline-primary" onClick={addHost} disabled={!newHost.trim()}>
-              <i className="bi bi-plus-circle me-1"></i>Add
-            </Button>
-          </InputGroup>
-
-          <ListGroup>
-            {hosts.map((host, i) => (
-              <ListGroup.Item key={i} className="d-flex justify-content-between align-items-center">
-                <code>{host}</code>
-                <Button variant="outline-danger" size="sm" onClick={() => removeHost(i)}>
-                  <i className="bi bi-trash"></i>
-                </Button>
-              </ListGroup.Item>
-            ))}
-            {hosts.length === 0 && (
-              <ListGroup.Item className="text-center text-muted">
-                No trusted hosts configured
-              </ListGroup.Item>
-            )}
-          </ListGroup>
+        <Card.Body className="p-0">
+          <Table hover responsive className="mb-0 align-middle">
+            <thead className="table-light">
+              <tr>
+                <th>
+                  Value
+                  <RowHelp title="IP / CIDR / hostname / refile:">
+                    <IpHelp />
+                    <hr />
+                    <CidrHelp />
+                    <hr />
+                    <HostnameHelp />
+                    <hr />
+                    <RefileDirectiveHelp />
+                  </RowHelp>
+                </th>
+                <th>
+                  Inline comment
+                  <RowHelp title="Inline comments">
+                    <InlineCommentHelp />
+                  </RowHelp>
+                </th>
+                <th className="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {entries.map((e) => (
+                <tr key={e.id}>
+                  <td>
+                    <code>{e.value}</code>
+                    {e.isRefile && (
+                      <Badge bg="info" className="ms-2">
+                        refile
+                      </Badge>
+                    )}
+                  </td>
+                  <td>
+                    {e.inlineComment ? (
+                      <span className="text-muted small font-monospace">{e.inlineComment}</span>
+                    ) : (
+                      <span className="text-muted small fst-italic">—</span>
+                    )}
+                  </td>
+                  <td className="text-end">
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      className="me-1"
+                      title="Edit trusted host"
+                      onClick={() => router.push(`/trusted-hosts/${encodeURIComponent(e.id)}`)}
+                    >
+                      <i className="bi bi-pencil"></i>
+                    </Button>
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      title="Delete trusted host"
+                      onClick={() => setShowDelete(e)}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+              {entries.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="text-center text-muted py-4">
+                    No trusted hosts configured. Click &quot;Add Trusted Host&quot; to add one.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
         </Card.Body>
       </Card>
+
+      <Modal show={!!showDelete} onHide={() => setShowDelete(null)}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="bi bi-exclamation-triangle text-danger me-2"></i>
+            Delete trusted host
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Delete this trusted host entry?</p>
+          <pre className="p-2 bg-light rounded border mb-0">
+            {showDelete?.value}
+            {showDelete?.inlineComment ? ` ${showDelete.inlineComment}` : ''}
+          </pre>
+          <p className="text-muted small mt-2 mb-0">
+            Comments and blank lines attached to this entry will be removed with it. Other
+            entries are unaffected.
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDelete(null)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete} disabled={deleting}>
+            {deleting ? (
+              <>
+                <Spinner size="sm" className="me-1" />
+                Deleting…
+              </>
+            ) : (
+              'Delete'
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }
