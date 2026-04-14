@@ -6,6 +6,7 @@
 **Test plans (local, no live server):**
 - Phase 1: [plan_signingtable-cross-domain_testplan.md](plan_signingtable-cross-domain_testplan.md)
 - Phase 2: [plan_signingtable-cross-domain_testplan_phase2.md](plan_signingtable-cross-domain_testplan_phase2.md)
+- Phase 3: [plan_signingtable-cross-domain_testplan_phase3.md](plan_signingtable-cross-domain_testplan_phase3.md)
 
 ## Tasks
 
@@ -34,18 +35,18 @@
   - [x] **Extra B:** narrow Delete Domain — `DomainEntry.id`, `removeDomain(…, ruleId?)`, `/api/domains` DELETE accepts `ruleId`, `/domains` UI passes it, confirmation copy rewritten ("Remove signing rule", explains key retention + no-auto-delete of key files).
   - [x] Automated success criteria — `make ci` passes: 76 tests across 8 files, tsc clean, eslint clean, next build succeeds with new routes registered and `/api/keys` gone.
   - [ ] Manual success criteria — see [Phase 2 testplan](plan_signingtable-cross-domain_testplan_phase2.md)
-- [ ] Phase 3: TrustedHosts first-class — **in progress**, re-reviewed 2026-04-14, scope agreed plan-verbatim with one deviation
-  - [ ] `lib/trusted-hosts.ts` + fixtures + tests (mirrors signing-table's shape minus reorder; inline-comment handling is the novel piece)
-  - [ ] `mutateTrustedHosts` atomic read-modify-write helper
-  - [ ] `lib/opendkim.ts` — `saveTrustedHosts` replaced by the new writer; legacy export removed (no external callers)
-  - [ ] Rewrite `app/api/trusted-hosts/route.ts` — `GET` (list) + `POST` (add). Bulk `PUT` dirty-flag save removed.
-  - [ ] New `app/api/trusted-hosts/[id]/route.ts` — `GET` / `PUT` / `DELETE`
-  - [ ] Rewrite `app/trusted-hosts/page.tsx` — per-row Edit / Delete, Add button links to `/trusted-hosts/new`
-  - [ ] New `app/trusted-hosts/new/page.tsx` and `app/trusted-hosts/[id]/page.tsx` (deep-linkable)
-  - [ ] Help — `TrustedHostsPageHelp` + `TrustedHostsAtoms` (IpHelp, CidrHelp, HostnameHelp, InlineCommentHelp). `RefileDirectiveHelp` re-exported from `SigningRulesAtoms` per plan's DRY note.
-  - [ ] **Plan deviation — inline comments survive edit.** The plan's explicit stance is "serialization for edited entries drops the inline comment (simpler canonical form)". Overridden: comments can carry important operator context and must stay through updates. The canonical emit for edited entries becomes `${value} ${inlineComment}` when one exists.
-  - [ ] Automated success criteria (`make ci`)
-  - [ ] Manual success criteria (local walkthrough on lucy)
+- [ ] Phase 3: TrustedHosts first-class — code complete on `feature/trustedhosts-first-class`, awaiting local manual verification
+  - [x] `lib/trusted-hosts.ts` + fixtures + tests (mirrors signing-table's shape minus reorder; inline-comment handling is the novel piece)
+  - [x] `mutateTrustedHosts` atomic read-modify-write helper
+  - [x] `lib/opendkim.ts` — `saveTrustedHosts(string[])` removed entirely; legacy `parseTrustedHosts` retained as a thin wrapper
+  - [x] Rewrite `app/api/trusted-hosts/route.ts` — `GET` (list) + `POST` (add). Bulk `PUT` dirty-flag save removed.
+  - [x] New `app/api/trusted-hosts/[id]/route.ts` — `GET` / `PUT` / `DELETE`
+  - [x] Rewrite `app/trusted-hosts/page.tsx` — per-row Edit / Delete, Add button links to `/trusted-hosts/new`
+  - [x] New `app/trusted-hosts/new/page.tsx` and `app/trusted-hosts/[id]/page.tsx` (deep-linkable)
+  - [x] Help — `TrustedHostsPageHelp` + `TrustedHostsAtoms` (IpHelp, CidrHelp, HostnameHelp, InlineCommentHelp). `RefileDirectiveHelp` re-exported from `SigningRulesAtoms` per plan's DRY note.
+  - [x] **Plan deviation — inline comments survive edit.** `updateEntry` defaults to preserving the existing inline comment; caller can pass `inlineComment: ''` to drop or a new string to replace. Three dedicated unit tests + matching API handler tests.
+  - [x] Automated success criteria — `make ci` passes: 111 tests across 11 files, tsc clean, eslint clean, next build succeeds with all new routes registered.
+  - [ ] Manual success criteria — see [Phase 3 testplan](plan_signingtable-cross-domain_testplan_phase3.md)
 - [ ] Phase 4 (future, pre-plan mode) — scope larger than a single vertical slice; enters `/preplan` when we start it
   - KeyTable R/W editor — individual key-entry add/edit/delete UI. Deferred from Phase 2 per plan's own explicit gate.
   - DKIM debugging UI for onboarding fresh + elsewhere-hosted domains. Scope TBD; likely touches DNS lookup ergonomics, live signature verification, key-vs-record diff views.
@@ -68,6 +69,8 @@
 - 2026-04-14 — **PR #4 merged to dev.** Phase 1 branch deleted. Phase 2 branched off fresh dev as `feature/keytable-thin`.
 - 2026-04-14 — **Phase 2 re-review complete.** Scope agreed: plan verbatim + two extras (Domains help retrofit + narrow Delete Domain) in a single batch / single PR.
 - 2026-04-14 — **Phase 2 code complete** on `feature/keytable-thin`. Commits: key-table lib + 18 tests (1cd52c3), opendkim refactor w/ narrow-delete (bf6f79e), keys API read-only (f4428d1), /keys rewrite + detail page (2c19eca), /domains retrofit + narrow-delete wiring (5ddb219). `make ci` green: 76 tests, clean tsc + eslint, build succeeds. Awaiting manual walkthrough on nancy before PR.
+- 2026-04-14 — **Phase 2 merged into `dev`** (PR #5). Branch deleted; `feature/trustedhosts-first-class` branched off the merged dev.
+- 2026-04-14 — **Phase 3 code complete** on `feature/trustedhosts-first-class`. Commits: tracker scope lock (ac9f43e), trusted-hosts lib + 19 tests + Phase 4 test-suite note (6984a2c), API rewrite + [id] route + 16 handler tests (56d678e), UI pages + help content + navbar pass-through (2ab70b5). `make ci` green: 111 tests across 11 files, clean tsc + eslint, `next build` registers `/api/trusted-hosts/[id]`, `/trusted-hosts/[id]`, `/trusted-hosts/new`. Awaiting manual walkthrough on lucy before PR.
 
 ## Decisions & Notes
 
