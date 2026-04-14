@@ -25,10 +25,10 @@ make ci     # lint → typecheck → test → build
 ```
 
 Expected:
-- [ ] `make lint` — no output
-- [ ] `make typecheck` — no output
-- [ ] `make test` — **52 passed** across 5 files
-- [ ] `make build` — succeeds; route list includes `/rules/signing`, `/rules/signing/new`, `/rules/signing/[id]`, `/api/rules/signing`, `/api/rules/signing/[id]`
+- [x] `make lint` — no output
+- [x] `make typecheck` — no output
+- [x] `make test` — **52 passed** across 5 files
+- [x] `make build` — succeeds; route list includes `/rules/signing`, `/rules/signing/new`, `/rules/signing/[id]`, `/api/rules/signing`, `/api/rules/signing/[id]`
 
 ## 2. Start the dev server
 
@@ -50,10 +50,10 @@ watch -n 0.5 'cat data/opendkim/SigningTable'
    - `*@example.com` → `mail._domainkey.example.com`
 
 Checks:
-- [ ] Navbar highlights **Signing Rules**.
-- [ ] "Order" column shows `1` and `2`.
-- [ ] "About this page" button is visible in the header.
-- [ ] Back-link **← Back to Domains** is visible under the page title.
+- [x] Navbar highlights **Signing Rules**.
+- [x] "Order" column shows `1` and `2`.
+- [x] "About this page" button is visible in the header.
+- [x] Back-link **← Back to Domains** is visible under the page title.
 
 ## 4. Add a canonical rule
 
@@ -63,10 +63,10 @@ Checks:
 4. Click **Add rule**.
 
 Checks:
-- [ ] Redirected back to `/rules/signing`.
-- [ ] New row appears at the **bottom** of the list (Order 3).
-- [ ] `data/opendkim/SigningTable` now contains the new line as its 3rd entry.
-- [ ] Original two lines are unchanged byte-for-byte.
+- [x] Redirected back to `/rules/signing`.
+- [x] New row appears at the **bottom** of the list (Order 3).
+- [x] `data/opendkim/SigningTable` now contains the new line as its 3rd entry.
+- [x] Original two lines are unchanged byte-for-byte.
 
 ## 5. Add a cross-domain rule (the originating driver)
 
@@ -76,9 +76,9 @@ Checks:
 4. Close the modal; submit the form.
 
 Checks:
-- [ ] Redirected to `/rules/signing`; new row at the bottom.
-- [ ] On-disk file has 4 lines, with the cross-domain rule last.
-- [ ] Row does **not** show the "non-standard" badge (it's a canonical two-token line).
+- [x] Redirected to `/rules/signing`; new row at the bottom.
+- [x] On-disk file has 4 lines, with the cross-domain rule last.
+- [x] Row does **not** show the "non-standard" badge (it's a canonical two-token line).
 
 ## 6. Edit a rule (new id on save, deep-linkable)
 
@@ -87,17 +87,17 @@ Checks:
 3. Change `Pattern` to `*@test-local-renamed.example` and save.
 
 Checks:
-- [ ] Redirected to `/rules/signing`; the row now shows the renamed pattern.
-- [ ] On-disk file reflects the rename; the OTHER three rules are byte-for-byte unchanged.
-- [ ] Paste the previously-copied URL into a **new private window** → you land on a **"Rule not found"** page (id changed on save — this is the plan's honest-URL behaviour).
-- [ ] From the "not found" page, click **Back to signing rules** — list renders.
+- [x] Redirected to `/rules/signing`; the row now shows the renamed pattern.
+- [x] On-disk file reflects the rename; the OTHER three rules are byte-for-byte unchanged.
+- [x] Paste the previously-copied URL into a **new private window** → you land on a **"Rule not found"** page (id changed on save — this is the plan's honest-URL behaviour).
+- [x] From the "not found" page, click **Back to signing rules** — list renders.
 
 Then test a deep-link that **does** still resolve:
 1. Copy the URL of the cross-domain rule's edit page.
 2. Open it in a new private window → edit form is prefilled with the cross-domain rule. No round-trip through the list page first.
 
 Checks:
-- [ ] Deep-link lands directly in edit state.
+- [x] Deep-link lands directly in edit state.
 
 ## 7. Reorder (first-match-wins is semantic)
 
@@ -105,9 +105,9 @@ Checks:
 2. Watch the `SigningTable` file in the other terminal between clicks.
 
 Checks:
-- [ ] Each click updates the file immediately and atomically (you never see a half-written file).
-- [ ] Final row order in the UI matches the file order byte-for-byte.
-- [ ] The comment-free seed lines that weren't touched are still byte-identical to their originals.
+- [x] Each click updates the file immediately and atomically (you never see a half-written file).
+- [x] Final row order in the UI matches the file order byte-for-byte.
+- [x] The comment-free seed lines that weren't touched are still byte-identical to their originals.
 
 ## 8. Duplicate-rule guard (409)
 
@@ -155,25 +155,25 @@ Bonus — test the edit-then-delete path:
 ## 11. 3-tier help surface
 
 From the list page:
-- [ ] **About this page** → modal shows the level-3 copy with sections "How it maps to the file", "Why the order matters", "Cross-domain and glob patterns", "Hand-edits survive".
-- [ ] `[?]` next to **Pattern** column → modal shows `PatternHelp` + divider + `CrossDomainMappingHelp`.
-- [ ] `[?]` next to **Key reference** column → modal shows `RefileDirectiveHelp`.
-- [ ] `[?]` next to the **Actions** header → modal shows `OrderHelp`.
+- [x] **About this page** → modal shows the level-3 copy with sections "How it maps to the file", "Why the order matters", "Cross-domain and glob patterns", "Hand-edits survive".
+- [x] `[?]` next to **Pattern** column → modal shows `PatternHelp` + divider + `CrossDomainMappingHelp`.
+- [x] `[?]` next to **Key reference** column → modal shows `RefileDirectiveHelp`.
+- [X] `[?]` next to the **Actions** header → modal shows `OrderHelp`.
 
 From `/rules/signing/new` (and the edit page):
-- [ ] `[?]` next to **Pattern** field label → level-2 `PatternHelp`.
-- [ ] `[?]` next to **Key reference** field label → level-2 `KeyRefHelp`.
-- [ ] Hover over Pattern input → tooltip appears.
-- [ ] Hover over Key reference input → tooltip appears.
-- [ ] **About this page** on the new-rule page → modal explains when to use this vs Add Domain, plus `CrossDomainMappingHelp`.
+- [x] `[?]` next to **Pattern** field label → level-2 `PatternHelp`.
+- [x] `[?]` next to **Key reference** field label → level-2 `KeyRefHelp`.
+- [x] Hover over Pattern input → tooltip appears.
+- [x] Hover over Key reference input → tooltip appears.
+- [x] **About this page** on the new-rule page → modal explains when to use this vs Add Domain, plus `CrossDomainMappingHelp`.
 
 ## 12. Keyboard + a11y spot check
 
 On `/rules/signing/new`:
-- [ ] Tab into the Pattern input. Focus ring visible.
-- [ ] Safari's VoiceOver (Cmd-F5) or macOS ChromeVox announces something like "Pattern, edit text, Sender-address pattern. Supports * as wildcard…". The tooltip content appears in the announcement because it's wired via `aria-describedby`.
-- [ ] Tab → Key reference behaves the same.
-- [ ] Esc on any open modal closes it without submitting anything.
+- [x] Tab into the Pattern input. Focus ring visible.
+- [x] Safari's VoiceOver (Cmd-F5) or macOS ChromeVox announces something like "Pattern, edit text, Sender-address pattern. Supports * as wildcard…". The tooltip content appears in the announcement because it's wired via `aria-describedby`.
+- [x] Tab → Key reference behaves the same.
+- [x] Esc on any open modal closes it without submitting anything.
 
 ## 13. Back-compat with existing Domains flow
 
@@ -182,15 +182,15 @@ On `/rules/signing/new`:
 3. Watch the Signing Rules list and the on-disk file.
 
 Checks:
-- [ ] New domain appears on `/domains`.
-- [ ] `/rules/signing` shows the new auto-generated signing rule at the bottom.
-- [ ] `data/opendkim/SigningTable` gains the expected line.
-- [ ] `data/opendkim/KeyTable` gains the matching entry (Phase 2 covers KeyTable safety, not this test).
-- [ ] The hand-added `# TODO: review…` comment from step 10 is still present.
+- [x] New domain appears on `/domains`.
+- [x] `/rules/signing` shows the new auto-generated signing rule at the bottom.
+- [x] `data/opendkim/SigningTable` gains the expected line.
+- [x] `data/opendkim/KeyTable` gains the matching entry (Phase 2 covers KeyTable safety, not this test).
+- [x] The hand-added `# TODO: review…` comment from step 10 is still present.
 
 Then delete that domain from `/domains`:
-- [ ] Its signing rule disappears from `/rules/signing`.
-- [ ] The `# TODO: review…` comment still survives.
+- [x] Its signing rule disappears from `/rules/signing`.
+- [x] The `# TODO: review…` comment still survives.
 
 ## 14. Single-instance invariant (Docker required — optional locally)
 
@@ -214,8 +214,8 @@ Since nancy isn't running opendkim, the "kill the container mid-write" check bec
 4. Restore: `chmod 0755 data/opendkim`. Confirm the file is unchanged byte-for-byte from step-10's baseline.
 
 Checks:
-- [ ] Failed writes leave the file untouched.
-- [ ] No `.tmp.*` files linger.
+- [x] Failed writes leave the file untouched.
+- [x] No `.tmp.*` files linger.
 
 ## 16. Teardown
 
