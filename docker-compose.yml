@@ -8,12 +8,6 @@ services:
     container_name: dkim-dashboard
     build:
       context: .
-      args:
-        # Match the host opendkim user's UID/GID so the container
-        # can read/write keys and config files.
-        # Find yours with: id opendkim
-        APP_UID: ${APP_UID:-113}
-        APP_GID: ${APP_GID:-113}
     ports:
       - "${DASHBOARD_PORT:-3000}:3000"
     volumes:
@@ -22,7 +16,15 @@ services:
       - ${OPENDKIM_CONF:-/etc/opendkim.conf}:/data/opendkim.conf:ro
       # Mount PID file directory for service reload (SIGUSR1)
       - ${OPENDKIM_RUN_DIR:-/run/opendkim}:/data/run:ro
+    env_file:
+      - path: .env
+        required: false
     environment:
+      # Runtime UID/GID — entrypoint creates the app user to match.
+      # Set to your host opendkim user's IDs: `id opendkim`.
+      - APP_UID=${APP_UID:-113}
+      - APP_GID=${APP_GID:-113}
+      # Container-internal paths — match the volume mount targets above.
       - OPENDKIM_CONFIG_DIR=/data/opendkim
       - OPENDKIM_CONF=/data/opendkim.conf
       - OPENDKIM_PID_FILE=/data/run/opendkim.pid
