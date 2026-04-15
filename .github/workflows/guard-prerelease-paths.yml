@@ -1,0 +1,42 @@
+name: Guard pre-release paths
+
+on:
+  pull_request_target:
+    branches: [main]
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block pre-release paths from landing on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Regex patterns: files matching ANY of these cannot change in a PR to main.
+          # Add patterns by appending alternations, e.g. '^docs/plans/|^scratch/'.
+          BLOCKED='^docs/plans/'
+
+          changed=$(gh pr view "$PR" --repo "$REPO" --json files --jq '.files[].path')
+          offenders=$(printf '%s\n' "$changed" | grep -E "$BLOCKED" || true)
+
+          if [ -n "$offenders" ]; then
+            {
+              echo "## Blocked: pre-release paths cannot land on \`main\`"
+              echo
+              echo "Files in this PR matching the block list:"
+              echo
+              printf -- '- `%s`\n' $offenders
+              echo
+              echo "Adjust [.github/workflows/guard-prerelease-paths.yml](.github/workflows/guard-prerelease-paths.yml) if this should be allowed."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::PR touches blocked pre-release paths (see job summary)."
+            exit 1
+          fi
+
+          echo "OK — no blocked paths in diff."
