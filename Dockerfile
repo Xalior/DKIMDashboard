@@ -26,20 +26,20 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Create app user — UID/GID set at build time to match the host opendkim user
-ARG APP_UID=113
-ARG APP_GID=113
-RUN addgroup -g ${APP_GID} -S dkim && \
-    adduser -u ${APP_UID} -S -G dkim dkim
+# su-exec lets the entrypoint drop privileges to a UID/GID chosen at runtime,
+# so one published image works on hosts where opendkim has any UID.
+RUN apk add --no-cache su-exec
 
 COPY --from=builder /app/public ./public
-COPY --from=builder --chown=dkim:dkim /app/.next/standalone ./
-COPY --from=builder --chown=dkim:dkim /app/.next/static ./.next/static
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
-USER dkim
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["node", "server.js"]
