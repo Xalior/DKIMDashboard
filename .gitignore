@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+# atomic-fs tmp files (same-directory .tmp.<pid>.<rand> pattern)
+.tmp.*
+**/.*.tmp.*
 
 # next.js
 /.next/

@@ -1,0 +1,14 @@
+# === DKIM signing rules ===
+# Default signing for the main domain
+*@id.nextbestnetwork.com mail._domainkey.nextbestnetwork.com
+
+# Smarthost pattern: sign mail relayed from ursa as clientmail.xalior.com
+*@ursa.xalior.com  mail._domainkey.clientmail.xalior.com
+
+# Glob catchall for subdomains
+*@*.xalior.com  mail._domainkey.clientmail.xalior.com
+
+# External rule file (malformed; preserved raw)
+refile:/etc/opendkim/CustomRules
+
+# End of signing rules

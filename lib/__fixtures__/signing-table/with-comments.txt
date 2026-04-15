@@ -1,0 +1,4 @@
+# SigningTable — maps sending addresses to signing keys
+# Managed by DKIM Dashboard
+
+*@id.nextbestnetwork.com mail._domainkey.nextbestnetwork.com

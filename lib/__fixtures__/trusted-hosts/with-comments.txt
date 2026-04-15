@@ -1,0 +1,11 @@
+# TrustedHosts — hosts allowed to submit mail for signing
+# Managed by DKIM Dashboard
+
+# Localhost
+127.0.0.1
+::1
+
+# Office network
+10.0.0.0/8
+
+mail.example.com
