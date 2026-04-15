@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - unreleased
+
+### Added
+
+- **Portable container image** — `APP_UID` / `APP_GID` moved from build-time
+  ARGs to a runtime `su-exec` entrypoint. One published image now works on
+  any host; the deployer sets `APP_UID` / `APP_GID` in env to match the host
+  `opendkim` user rather than rebuilding.
+- **`make release` automation** — runs the `dev → staging-strip → main` flow
+  with precondition checks (on `dev`, clean tree, not behind `origin/dev`).
+  Strips `docs/plans/` before merging so release history stays clean.
+  `make release-abort` recovers from a failed run mid-flight.
+- **Docker compose `make` targets** — `prod-build`, `prod-start`, `prod-stop`,
+  `prod-logs`, `prod-rebuild` wrap the common `docker compose` invocations.
+- **GHCR publish workflow** — on a published GitHub Release, CI builds a
+  multi-arch (`linux/amd64` + `linux/arm64`) image and pushes to
+  `ghcr.io/xalior/dkim-dashboard` with semver tags plus `latest`.
+
+### Changed
+
+- `docker-compose.yml` sources runtime app config via `env_file: .env`
+  (optional). The three `OPENDKIM_*` container-internal paths remain
+  hardcoded to match the volume mount targets.
+
 ## [0.1.1] - 2026-04-15
 
 ### Added
