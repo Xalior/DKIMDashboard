@@ -1,4 +1,4 @@
-.PHONY: dev build start lint typecheck test test-watch ci release release-abort
+.PHONY: dev build start lint typecheck test test-watch ci prod-build prod-start prod-stop prod-logs prod-rebuild release release-abort
 
 STRIP_PATHS := docs/plans
 
@@ -24,6 +24,21 @@ test-watch:
 	npx vitest
 
 ci: lint typecheck test build
+
+prod-build:
+	docker compose build
+
+prod-start:
+	docker compose up -d
+
+prod-stop:
+	docker compose down
+
+prod-logs:
+	docker compose logs -f
+
+prod-rebuild:
+	docker compose up -d --build
 
 release:
 	@test "$$(git rev-parse --abbrev-ref HEAD)" = "dev" || { echo "error: must be on 'dev' to release (currently on $$(git rev-parse --abbrev-ref HEAD))"; exit 1; }
