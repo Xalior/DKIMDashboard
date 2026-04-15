@@ -9,12 +9,15 @@
 ## ✨ Features
 
 - 🌐 **Domain Management** — Add, remove, and view signing domains with their from-patterns and selectors
+- 📜 **Signing Rules** — First-class CRUD over `SigningTable` entries with stable ids and deep-linkable rows
 - 🔑 **Key Generation** — Pure TypeScript RSA-2048 key generation, no shell dependencies
 - 📋 **DNS Record View** — See exactly what TXT record each domain needs
 - ✅ **DNS Verification** — Live DNS lookups to validate your DKIM records match the keys on disk
-- 👥 **Trusted Hosts** — Manage the hosts/networks allowed to send mail for signing
+- 👥 **Trusted Hosts** — Per-entry editor that preserves hand-edited comments and `refile:` directives
+- ❓ **Built-in Help** — 3-tier contextual help (page overview, field tooltips, per-row drawers) on every management page
+- 💾 **Config-safe writes** — Round-trip-safe parsers/writers and atomic `tmp-then-rename` saves keep hand-edits and comments intact
 - ⚙️ **Config Viewer** — Read-only view of `opendkim.conf`, `SigningTable`, and `KeyTable`
-- 🔄 **Service Reload** — Send SIGHUP to OpenDKIM to pick up config changes
+- 🔄 **Service Reload** — Send `SIGUSR1` to OpenDKIM to pick up config changes
 
 ## 🚀 Quick Start
 
