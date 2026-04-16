@@ -25,7 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `docker-compose.yml` sources runtime app config via `env_file: .env`
+- **Compose split** — renamed `docker-compose.yml` to `compose.yml` (modern
+  Compose naming). The hosting compose now references the GHCR image directly;
+  deployers pull `ghcr.io/xalior/dkim-dashboard:latest` and run with just
+  `compose.yml` plus `.env` — no source tree needed. A new `compose.dev.yml`
+  overlay swaps the image for a local build context.
+- Makefile `prod-start`/`prod-stop`/`prod-logs` use `compose.yml` only
+  (GHCR image). `prod-build`/`prod-rebuild` layer `compose.dev.yml` for
+  local builds.
+- `compose.yml` sources runtime app config via `env_file: .env`
   (optional). The three `OPENDKIM_*` container-internal paths remain
   hardcoded to match the volume mount targets.
 

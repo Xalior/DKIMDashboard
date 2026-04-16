@@ -205,9 +205,9 @@ If the values don't match, the container will get permission errors reading/writ
 
 Host paths are mounted into `/data/` inside the container rather than system paths — the container has no reason to expose `/etc/` or `/run/`.
 
-### Service Reload (SIGHUP)
+### Service Reload (SIGUSR1)
 
-The reload button sends `SIGHUP` to the host's OpenDKIM process via its PID file. This requires `pid: host` in docker-compose, which shares the host PID namespace with the container.
+The reload button sends `SIGUSR1` to the host's OpenDKIM process via its PID file. This requires `pid: host` in `compose.yml`, which shares the host PID namespace with the container.
 
 If you prefer not to grant this access, remove the `pid: host` line — everything else works without it, but reload must be done manually on the host:
 

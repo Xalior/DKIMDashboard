@@ -55,7 +55,7 @@ docker compose up -d
 
 ### ⚠️ Deployment constraint: single instance
 
-The dashboard is designed to run as exactly **one instance per mounted `/etc/opendkim` config tree**. Its concurrency model is an in-process async mutex around each config write — safe against concurrent requests within one Node process, but **not** safe against multiple writers sharing the same config directory. The bundled `docker-compose.yml` codifies this with a fixed `container_name`; Compose refuses `docker compose up --scale dkim-dashboard=N` as a result.
+The dashboard is designed to run as exactly **one instance per mounted `/etc/opendkim` config tree**. Its concurrency model is an in-process async mutex around each config write — safe against concurrent requests within one Node process, but **not** safe against multiple writers sharing the same config directory. The bundled `compose.yml` codifies this with a fixed `container_name`; Compose refuses `docker compose up --scale dkim-dashboard=N` as a result.
 
 If you deploy outside Compose (raw Docker, Kubernetes, systemd, …) **do not run replicas against the same config mount**. Running two instances will not corrupt files mid-write (writes are atomic `tmp-then-rename`) but concurrent writers can clobber each other's intended state (last-writer-wins across processes).
 
