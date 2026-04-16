@@ -15,9 +15,12 @@
 
 ## Tasks
 
-- [ ] Phase 1: Compose split and Makefile update
+- [x] Phase 1: Compose split and Makefile update
 
 ## Progress Log
+
+- Phase 1 started: compose split and Makefile update
+- Phase 1 automated criteria: all pass (make ci green, compose config validated both modes)
 
 ## Decisions & Notes
 
@@ -33,3 +36,7 @@
 - **Ignored (below trust threshold):**
 
 ## Commits
+
+- `3d57447` refactor: rename docker-compose.yml to compose.yml, use GHCR image
+- `3c7d08f` feat: add compose.dev.yml overlay for local builds
+- `b726888` refactor: update Makefile prod-* targets for layered compose
