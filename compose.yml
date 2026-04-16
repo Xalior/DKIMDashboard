@@ -6,8 +6,7 @@ services:
     # (per-path async mutex over /etc/opendkim writes) is only safe for a
     # single writer against a given config tree — see README § Deployment.
     container_name: dkim-dashboard
-    build:
-      context: .
+    image: ghcr.io/xalior/dkim-dashboard:latest
     ports:
       - "${DASHBOARD_PORT:-3000}:3000"
     volumes:
