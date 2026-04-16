@@ -1,6 +1,6 @@
 # Implementation: Compose split — GHCR image for hosting, local build for dev
 
-**Status:** In Progress
+**Status:** Complete
 **Branch:** `dev`
 **Plan:** `docs/plans/plan_compose-split.md`
 **PR:** https://github.com/Xalior/DKIMDashboard/pull/7
@@ -21,6 +21,7 @@
 
 - Phase 1 started: compose split and Makefile update
 - Phase 1 automated criteria: all pass (make ci green, compose config validated both modes)
+- Phase 1 manual criteria: `make prod-rebuild` builds locally and starts container — confirmed. `make prod-start` GHCR pull deferred until first release (no image published yet).
 
 ## Decisions & Notes
 
