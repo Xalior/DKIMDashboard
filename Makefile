@@ -2,6 +2,9 @@
 
 STRIP_PATHS := docs/plans
 
+COMPOSE     := -f compose.yml
+COMPOSE_DEV := $(COMPOSE) -f compose.dev.yml
+
 dev:
 	npx next dev
 
@@ -26,19 +29,19 @@ test-watch:
 ci: lint typecheck test build
 
 prod-build:
-	docker compose build
+	docker compose $(COMPOSE_DEV) build
 
 prod-start:
-	docker compose up -d
+	docker compose $(COMPOSE) up -d
 
 prod-stop:
-	docker compose down
+	docker compose $(COMPOSE) down
 
 prod-logs:
-	docker compose logs -f
+	docker compose $(COMPOSE) logs -f
 
 prod-rebuild:
-	docker compose up -d --build
+	docker compose $(COMPOSE_DEV) up -d --build
 
 release:
 	@test "$$(git rev-parse --abbrev-ref HEAD)" = "dev" || { echo "error: must be on 'dev' to release (currently on $$(git rev-parse --abbrev-ref HEAD))"; exit 1; }
