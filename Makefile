@@ -47,6 +47,7 @@ release:
 	@test "$$(git rev-parse --abbrev-ref HEAD)" = "dev" || { echo "error: must be on 'dev' to release (currently on $$(git rev-parse --abbrev-ref HEAD))"; exit 1; }
 	@test -z "$$(git status --porcelain)" || { echo "error: working tree not clean — commit or stash first"; exit 1; }
 	git fetch origin
+	git push origin dev
 	@git merge-base --is-ancestor origin/dev HEAD || { echo "error: local dev is behind origin/dev — pull first"; exit 1; }
 	git checkout -B staging dev
 	@if git ls-tree -r dev -- $(STRIP_PATHS)/ 2>/dev/null | grep -q .; then \
@@ -61,8 +62,6 @@ release:
 	git push origin main
 	git checkout dev
 	git branch -D staging
-	@echo ""
-	@echo "==> released to main. 'git push origin dev' when you want to publish dev."
 
 release-abort:
 	@echo "==> aborting in-progress release"
